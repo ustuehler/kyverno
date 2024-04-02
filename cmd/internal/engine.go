@@ -18,7 +18,6 @@ import (
 	"github.com/kyverno/kyverno/pkg/engine/context/resolvers"
 	"github.com/kyverno/kyverno/pkg/engine/factories"
 	"github.com/kyverno/kyverno/pkg/engine/jmespath"
-	"github.com/kyverno/kyverno/pkg/exceptions"
 	"github.com/kyverno/kyverno/pkg/imageverifycache"
 	"github.com/kyverno/kyverno/pkg/registryclient"
 	"k8s.io/client-go/kubernetes"
@@ -67,17 +66,16 @@ func NewExceptionSelector(
 	var exceptionsLister engineapi.PolicyExceptionSelector
 	if enablePolicyException {
 		factory := kyvernoinformer.NewSharedInformerFactory(kyvernoClient, resyncPeriod)
-		var lister exceptions.Lister
+		lister := factory.Kyverno().V2beta1().PolicyExceptions().Lister()
 		if exceptionNamespace != "" {
-			lister = factory.Kyverno().V2beta1().PolicyExceptions().Lister().PolicyExceptions(exceptionNamespace)
+			exceptionsLister = lister.PolicyExceptions(exceptionNamespace)
 		} else {
-			lister = factory.Kyverno().V2beta1().PolicyExceptions().Lister()
+			exceptionsLister = lister
 		}
 		// start informers and wait for cache sync
 		if !StartInformersAndWaitForCacheSync(ctx, logger, factory) {
 			checkError(logger, errors.New("failed to wait for cache sync"), "failed to wait for cache sync")
 		}
-		exceptionsLister = exceptions.New(lister)
 	}
 	return exceptionsLister
 }
