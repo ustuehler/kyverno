@@ -26,7 +26,6 @@ import (
 	"github.com/kyverno/kyverno/pkg/engine/jmespath"
 	"github.com/kyverno/kyverno/pkg/engine/mutate/patch"
 	"github.com/kyverno/kyverno/pkg/engine/policycontext"
-	"github.com/kyverno/kyverno/pkg/exceptions"
 	"github.com/kyverno/kyverno/pkg/imageverifycache"
 	"github.com/kyverno/kyverno/pkg/registryclient"
 	jsonutils "github.com/kyverno/kyverno/pkg/utils/json"
@@ -81,7 +80,7 @@ func (p *PolicyProcessor) ApplyPoliciesOnResource() ([]engineapi.EngineResponse,
 		factories.DefaultRegistryClientFactory(adapters.RegistryClient(rclient), nil),
 		imageverifycache.DisabledImageVerifyCache(),
 		store.ContextLoaderFactory(p.Store, nil),
-		exceptions.New(policyExceptionLister),
+		policyExceptionLister,
 	)
 	gvk, subresource := resource.GroupVersionKind(), ""
 	// If --cluster flag is not set, then we need to find the top level resource GVK and subresource
