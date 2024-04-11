@@ -13,7 +13,6 @@ import (
 	"go.opentelemetry.io/otel/metric"
 	corev1 "k8s.io/api/core/v1"
 	eventsv1 "k8s.io/api/events/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/sets"
@@ -45,11 +44,10 @@ type controller struct {
 	clock                clock.Clock
 	hostname             string
 	droppedEventsCounter metric.Int64Counter
-	maxQueuedEvents      int
 }
 
 // NewEventGenerator to generate a new event controller
-func NewEventGenerator(eventsClient v1.EventsV1Interface, logger logr.Logger, maxQueuedEvents int, omitEvents ...string) *controller {
+func NewEventGenerator(eventsClient v1.EventsV1Interface, logger logr.Logger, omitEvents ...string) *controller {
 	clock := clock.RealClock{}
 	hostname, _ := os.Hostname()
 	meter := otel.GetMeterProvider().Meter(metrics.MeterName)
@@ -68,7 +66,6 @@ func NewEventGenerator(eventsClient v1.EventsV1Interface, logger logr.Logger, ma
 		clock:                clock,
 		hostname:             hostname,
 		droppedEventsCounter: droppedEventsCounter,
-		maxQueuedEvents:      maxQueuedEvents,
 	}
 }
 
@@ -76,10 +73,6 @@ func NewEventGenerator(eventsClient v1.EventsV1Interface, logger logr.Logger, ma
 func (gen *controller) Add(infos ...Info) {
 	logger := gen.logger
 	logger.V(3).Info("generating events", "count", len(infos))
-	if gen.maxQueuedEvents == 0 || gen.queue.Len() > gen.maxQueuedEvents {
-		logger.V(2).Info("exceeds the event queue limit, dropping the event", "maxQueuedEvents", gen.maxQueuedEvents, "current size", gen.queue.Len())
-		return
-	}
 	for _, info := range infos {
 		// don't create event for resources with generateName as the name is not generated yet
 		if info.Regarding.Name == "" {
@@ -126,7 +119,7 @@ func (gen *controller) processNextWorkItem(ctx context.Context) bool {
 		return true
 	}
 	_, err := gen.eventsClient.Events(event.Namespace).Create(ctx, event, metav1.CreateOptions{})
-	if err != nil && !apierrors.IsNotFound(err) {
+	if err != nil {
 		if gen.queue.NumRequeues(key) < workQueueRetryLimit {
 			logger.Error(err, "failed to create event", "key", key)
 			gen.queue.AddRateLimited(key)

@@ -354,7 +354,6 @@ func main() {
 	eventGenerator := event.NewEventGenerator(
 		setup.EventsClient,
 		logging.WithName("EventGenerator"),
-		maxQueuedEvents,
 		strings.Split(omitEvents, ",")...,
 	)
 	gcstore := store.New()
@@ -371,7 +370,6 @@ func main() {
 		),
 		globalcontextcontroller.Workers,
 	)
-	polexCache, polexController := internal.NewExceptionSelector(setup.Logger, kyvernoInformer)
 	eventController := internal.NewController(
 		event.ControllerName,
 		eventGenerator,
@@ -417,7 +415,6 @@ func main() {
 		setup.KyvernoClient,
 		setup.RegistrySecretLister,
 		apicall.NewAPICallConfiguration(maxAPICallResponseLength),
-		polexCache,
 		gcstore,
 	)
 	// create non leader controllers
@@ -580,9 +577,6 @@ func main() {
 	// start non leader controllers
 	eventController.Run(signalCtx, setup.Logger, &wg)
 	gceController.Run(signalCtx, setup.Logger, &wg)
-	if polexController != nil {
-		polexController.Run(signalCtx, setup.Logger, &wg)
-	}
 	for _, controller := range nonLeaderControllers {
 		controller.Run(signalCtx, setup.Logger.WithName("controllers"), &wg)
 	}
