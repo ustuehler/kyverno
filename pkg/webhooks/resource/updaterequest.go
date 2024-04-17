@@ -3,7 +3,6 @@ package resource
 import (
 	"context"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -20,20 +19,19 @@ import (
 )
 
 // handleBackgroundApplies applies generate and mutateExisting policies, and creates update requests for background reconcile
-func (h *resourceHandlers) handleBackgroundApplies(ctx context.Context, logger logr.Logger, request handlers.AdmissionRequest, generatePolicies, mutatePolicies []kyvernov1.PolicyInterface, ts time.Time, wg *sync.WaitGroup) {
-	go h.handleMutateExisting(ctx, logger, request, mutatePolicies, ts, wg)
-	go h.handleGenerate(ctx, logger, request, generatePolicies, ts, wg)
+func (h *resourceHandlers) handleBackgroundApplies(ctx context.Context, logger logr.Logger, request handlers.AdmissionRequest, generatePolicies, mutatePolicies []kyvernov1.PolicyInterface, ts time.Time) {
+	h.wg.Add(1)
+	go h.handleMutateExisting(ctx, logger, request, mutatePolicies, ts)
+	h.handleGenerate(ctx, logger, request, generatePolicies, ts)
 }
 
-func (h *resourceHandlers) handleMutateExisting(ctx context.Context, logger logr.Logger, request handlers.AdmissionRequest, policies []kyvernov1.PolicyInterface, admissionRequestTimestamp time.Time, wg *sync.WaitGroup) {
+func (h *resourceHandlers) handleMutateExisting(ctx context.Context, logger logr.Logger, request handlers.AdmissionRequest, policies []kyvernov1.PolicyInterface, admissionRequestTimestamp time.Time) {
 	policyContext, err := h.buildPolicyContextFromAdmissionRequest(logger, request)
 	if err != nil {
 		logger.Error(err, "failed to create policy context")
 		return
 	}
-	if wg != nil { // for unit testing purposes
-		defer wg.Done()
-	}
+	h.wg.Done()
 
 	if request.AdmissionRequest.Operation == admissionv1.Delete {
 		policyContext = policyContext.WithNewResource(policyContext.OldResource())
@@ -94,15 +92,13 @@ func (h *resourceHandlers) handleMutateExisting(ctx context.Context, logger logr
 	}
 }
 
-func (h *resourceHandlers) handleGenerate(ctx context.Context, logger logr.Logger, request handlers.AdmissionRequest, generatePolicies []kyvernov1.PolicyInterface, ts time.Time, wg *sync.WaitGroup) {
+func (h *resourceHandlers) handleGenerate(ctx context.Context, logger logr.Logger, request handlers.AdmissionRequest, generatePolicies []kyvernov1.PolicyInterface, ts time.Time) {
 	policyContext, err := h.buildPolicyContextFromAdmissionRequest(logger, request)
 	if err != nil {
 		logger.Error(err, "failed to create policy context")
 		return
 	}
-	if wg != nil { // for unit testing purposes
-		defer wg.Done()
-	}
+	h.wg.Done()
 
 	gh := generation.NewGenerationHandler(logger, h.engine, h.client, h.kyvernoClient, h.nsLister, h.urLister, h.cpolLister, h.polLister, h.urGenerator, h.eventGen, h.metricsConfig, h.backgroundServiceAccountName)
 	var policies []kyvernov1.PolicyInterface
@@ -112,5 +108,5 @@ func (h *resourceHandlers) handleGenerate(ctx context.Context, logger logr.Logge
 			policies = append(policies, new)
 		}
 	}
-	gh.Handle(ctx, request.AdmissionRequest, policies, policyContext)
+	go gh.Handle(ctx, request.AdmissionRequest, policies, policyContext)
 }

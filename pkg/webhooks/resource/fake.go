@@ -3,7 +3,6 @@ package resource
 import (
 	"context"
 
-	"github.com/alitto/pond"
 	fakekyvernov1 "github.com/kyverno/kyverno/pkg/client/clientset/versioned/fake"
 	kyvernoinformers "github.com/kyverno/kyverno/pkg/client/informers/externalversions"
 	"github.com/kyverno/kyverno/pkg/clients/dclient"
@@ -14,7 +13,6 @@ import (
 	"github.com/kyverno/kyverno/pkg/engine/factories"
 	"github.com/kyverno/kyverno/pkg/engine/jmespath"
 	"github.com/kyverno/kyverno/pkg/event"
-	"github.com/kyverno/kyverno/pkg/exceptions"
 	"github.com/kyverno/kyverno/pkg/imageverifycache"
 	"github.com/kyverno/kyverno/pkg/metrics"
 	"github.com/kyverno/kyverno/pkg/policycache"
@@ -54,7 +52,6 @@ func NewFakeHandlers(ctx context.Context, policyCache policycache.Cache) *resour
 		urGenerator:   updaterequest.NewFake(),
 		eventGen:      event.NewFake(),
 		pcBuilder:     webhookutils.NewPolicyContextBuilder(configuration, jp),
-		auditPool:     pond.New(8, 1000),
 		engine: engine.NewEngine(
 			configuration,
 			config.NewDefaultMetricsConfiguration(),
@@ -63,7 +60,7 @@ func NewFakeHandlers(ctx context.Context, policyCache policycache.Cache) *resour
 			factories.DefaultRegistryClientFactory(adapters.RegistryClient(rclient), nil),
 			imageverifycache.DisabledImageVerifyCache(),
 			factories.DefaultContextLoaderFactory(configMapResolver),
-			exceptions.New(peLister),
+			peLister,
 		),
 	}
 }
