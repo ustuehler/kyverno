@@ -213,10 +213,10 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: kyverno-crds
-    app.kubernetes.io/version: v0.0.0
-    helm.sh/chart: crds-v0.0.0
+    app.kubernetes.io/version: 3.2.1
+    helm.sh/chart: crds-3.2.1
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: admissionreports.kyverno.io
 spec:
   group: kyverno.io
@@ -880,10 +880,10 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: kyverno-crds
-    app.kubernetes.io/version: v0.0.0
-    helm.sh/chart: crds-v0.0.0
+    app.kubernetes.io/version: 3.2.1
+    helm.sh/chart: crds-3.2.1
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: backgroundscanreports.kyverno.io
 spec:
   group: kyverno.io
@@ -1465,10 +1465,10 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: kyverno-crds
-    app.kubernetes.io/version: v0.0.0
-    helm.sh/chart: crds-v0.0.0
+    app.kubernetes.io/version: 3.2.1
+    helm.sh/chart: crds-3.2.1
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: cleanuppolicies.kyverno.io
 spec:
   group: kyverno.io
@@ -1651,7 +1651,6 @@ spec:
                         method:
                           default: GET
                           description: Method is the HTTP request type (GET or POST).
-                            Defaults to GET.
                           enum:
                           - GET
                           - POST
@@ -2871,7 +2870,6 @@ spec:
                         method:
                           default: GET
                           description: Method is the HTTP request type (GET or POST).
-                            Defaults to GET.
                           enum:
                           - GET
                           - POST
@@ -4091,7 +4089,6 @@ spec:
                         method:
                           default: GET
                           description: Method is the HTTP request type (GET or POST).
-                            Defaults to GET.
                           enum:
                           - GET
                           - POST
@@ -5152,10 +5149,10 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: kyverno-crds
-    app.kubernetes.io/version: v0.0.0
-    helm.sh/chart: crds-v0.0.0
+    app.kubernetes.io/version: 3.2.1
+    helm.sh/chart: crds-3.2.1
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: clusteradmissionreports.kyverno.io
 spec:
   group: kyverno.io
@@ -5821,10 +5818,10 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: kyverno-crds
-    app.kubernetes.io/version: v0.0.0
-    helm.sh/chart: crds-v0.0.0
+    app.kubernetes.io/version: 3.2.1
+    helm.sh/chart: crds-3.2.1
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: clusterbackgroundscanreports.kyverno.io
 spec:
   group: kyverno.io
@@ -6406,10 +6403,10 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: kyverno-crds
-    app.kubernetes.io/version: v0.0.0
-    helm.sh/chart: crds-v0.0.0
+    app.kubernetes.io/version: 3.2.1
+    helm.sh/chart: crds-3.2.1
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: clustercleanuppolicies.kyverno.io
 spec:
   group: kyverno.io
@@ -6592,7 +6589,6 @@ spec:
                         method:
                           default: GET
                           description: Method is the HTTP request type (GET or POST).
-                            Defaults to GET.
                           enum:
                           - GET
                           - POST
@@ -7812,7 +7808,6 @@ spec:
                         method:
                           default: GET
                           description: Method is the HTTP request type (GET or POST).
-                            Defaults to GET.
                           enum:
                           - GET
                           - POST
@@ -9032,7 +9027,6 @@ spec:
                         method:
                           default: GET
                           description: Method is the HTTP request type (GET or POST).
-                            Defaults to GET.
                           enum:
                           - GET
                           - POST
@@ -10093,10 +10087,10 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: kyverno-crds
-    app.kubernetes.io/version: v0.0.0
-    helm.sh/chart: crds-v0.0.0
+    app.kubernetes.io/version: 3.2.1
+    helm.sh/chart: crds-3.2.1
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: clusterpolicies.kyverno.io
 spec:
   group: kyverno.io
@@ -10321,7 +10315,7 @@ spec:
                               method:
                                 default: GET
                                 description: Method is the HTTP request type (GET
-                                  or POST). Defaults to GET.
+                                  or POST).
                                 enum:
                                 - GET
                                 - POST
@@ -11901,7 +11895,7 @@ spec:
                                         method:
                                           default: GET
                                           description: Method is the HTTP request
-                                            type (GET or POST). Defaults to GET.
+                                            type (GET or POST).
                                           enum:
                                           - GET
                                           - POST
@@ -12241,7 +12235,7 @@ spec:
                                         method:
                                           default: GET
                                           description: Method is the HTTP request
-                                            type (GET or POST). Defaults to GET.
+                                            type (GET or POST).
                                           enum:
                                           - GET
                                           - POST
@@ -12812,7 +12806,7 @@ spec:
                                         method:
                                           default: GET
                                           description: Method is the HTTP request
-                                            type (GET or POST). Defaults to GET.
+                                            type (GET or POST).
                                           enum:
                                           - GET
                                           - POST
@@ -13157,12 +13151,6 @@ spec:
                                                     used to validate SCTs against
                                                     a custom source.
                                                   type: string
-                                                tsaCertChain:
-                                                  description: |-
-                                                    TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                    contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                    may contain the leaf TSA certificate if not present in the timestamurce.
-                                                  type: string
                                               type: object
                                             rekor:
                                               description: |-
@@ -13212,12 +13200,6 @@ spec:
                                                   description: PubKey, if set, is
                                                     used to validate SCTs against
                                                     a custom source.
-                                                  type: string
-                                                tsaCertChain:
-                                                  description: |-
-                                                    TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                    contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                    may contain the leaf TSA certificate if not present in the timestamurce.
                                                   type: string
                                               type: object
                                             issuer:
@@ -13274,12 +13256,6 @@ spec:
                                                   description: PubKey, if set, is
                                                     used to validate SCTs against
                                                     a custom source.
-                                                  type: string
-                                                tsaCertChain:
-                                                  description: |-
-                                                    TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                    contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                    may contain the leaf TSA certificate if not present in the timestamurce.
                                                   type: string
                                               type: object
                                             kms:
@@ -13576,12 +13552,6 @@ spec:
                                                         is used to validate SCTs against
                                                         a custom source.
                                                       type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
-                                                      type: string
                                                   type: object
                                                 rekor:
                                                   description: |-
@@ -13631,12 +13601,6 @@ spec:
                                                       description: PubKey, if set,
                                                         is used to validate SCTs against
                                                         a custom source.
-                                                      type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
                                                       type: string
                                                   type: object
                                                 issuer:
@@ -13693,12 +13657,6 @@ spec:
                                                       description: PubKey, if set,
                                                         is used to validate SCTs against
                                                         a custom source.
-                                                      type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
                                                       type: string
                                                   type: object
                                                 kms:
@@ -13954,12 +13912,6 @@ spec:
                                                   to validate SCTs against a custom
                                                   source.
                                                 type: string
-                                              tsaCertChain:
-                                                description: |-
-                                                  TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                  contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                  may contain the leaf TSA certificate if not present in the timestamurce.
-                                                type: string
                                             type: object
                                           rekor:
                                             description: |-
@@ -14008,12 +13960,6 @@ spec:
                                                 description: PubKey, if set, is used
                                                   to validate SCTs against a custom
                                                   source.
-                                                type: string
-                                              tsaCertChain:
-                                                description: |-
-                                                  TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                  contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                  may contain the leaf TSA certificate if not present in the timestamurce.
                                                 type: string
                                             type: object
                                           issuer:
@@ -14069,12 +14015,6 @@ spec:
                                                 description: PubKey, if set, is used
                                                   to validate SCTs against a custom
                                                   source.
-                                                type: string
-                                              tsaCertChain:
-                                                description: |-
-                                                  TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                  contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                  may contain the leaf TSA certificate if not present in the timestamurce.
                                                 type: string
                                             type: object
                                           kms:
@@ -14501,7 +14441,7 @@ spec:
                                   method:
                                     default: GET
                                     description: Method is the HTTP request type (GET
-                                      or POST). Defaults to GET.
+                                      or POST).
                                     enum:
                                     - GET
                                     - POST
@@ -16095,7 +16035,7 @@ spec:
                                             method:
                                               default: GET
                                               description: Method is the HTTP request
-                                                type (GET or POST). Defaults to GET.
+                                                type (GET or POST).
                                               enum:
                                               - GET
                                               - POST
@@ -16443,7 +16383,7 @@ spec:
                                             method:
                                               default: GET
                                               description: Method is the HTTP request
-                                                type (GET or POST). Defaults to GET.
+                                                type (GET or POST).
                                               enum:
                                               - GET
                                               - POST
@@ -17025,7 +16965,7 @@ spec:
                                             method:
                                               default: GET
                                               description: Method is the HTTP request
-                                                type (GET or POST). Defaults to GET.
+                                                type (GET or POST).
                                               enum:
                                               - GET
                                               - POST
@@ -17378,12 +17318,6 @@ spec:
                                                         is used to validate SCTs against
                                                         a custom source.
                                                       type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
-                                                      type: string
                                                   type: object
                                                 rekor:
                                                   description: |-
@@ -17433,12 +17367,6 @@ spec:
                                                       description: PubKey, if set,
                                                         is used to validate SCTs against
                                                         a custom source.
-                                                      type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
                                                       type: string
                                                   type: object
                                                 issuer:
@@ -17495,12 +17423,6 @@ spec:
                                                       description: PubKey, if set,
                                                         is used to validate SCTs against
                                                         a custom source.
-                                                      type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
                                                       type: string
                                                   type: object
                                                 kms:
@@ -17800,12 +17722,6 @@ spec:
                                                             SCTs against a custom
                                                             source.
                                                           type: string
-                                                        tsaCertChain:
-                                                          description: |-
-                                                            TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                            contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                            may contain the leaf TSA certificate if not present in the timestamurce.
-                                                          type: string
                                                       type: object
                                                     rekor:
                                                       description: |-
@@ -17857,12 +17773,6 @@ spec:
                                                             set, is used to validate
                                                             SCTs against a custom
                                                             source.
-                                                          type: string
-                                                        tsaCertChain:
-                                                          description: |-
-                                                            TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                            contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                            may contain the leaf TSA certificate if not present in the timestamurce.
                                                           type: string
                                                       type: object
                                                     issuer:
@@ -17922,12 +17832,6 @@ spec:
                                                             set, is used to validate
                                                             SCTs against a custom
                                                             source.
-                                                          type: string
-                                                        tsaCertChain:
-                                                          description: |-
-                                                            TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                            contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                            may contain the leaf TSA certificate if not present in the timestamurce.
                                                           type: string
                                                       type: object
                                                     kms:
@@ -18185,12 +18089,6 @@ spec:
                                                       used to validate SCTs against
                                                       a custom source.
                                                     type: string
-                                                  tsaCertChain:
-                                                    description: |-
-                                                      TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                      contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                      may contain the leaf TSA certificate if not present in the timestamurce.
-                                                    type: string
                                                 type: object
                                               rekor:
                                                 description: |-
@@ -18240,12 +18138,6 @@ spec:
                                                     description: PubKey, if set, is
                                                       used to validate SCTs against
                                                       a custom source.
-                                                    type: string
-                                                  tsaCertChain:
-                                                    description: |-
-                                                      TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                      contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                      may contain the leaf TSA certificate if not present in the timestamurce.
                                                     type: string
                                                 type: object
                                               issuer:
@@ -18302,12 +18194,6 @@ spec:
                                                     description: PubKey, if set, is
                                                       used to validate SCTs against
                                                       a custom source.
-                                                    type: string
-                                                  tsaCertChain:
-                                                    description: |-
-                                                      TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                      contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                      may contain the leaf TSA certificate if not present in the timestamurce.
                                                     type: string
                                                 type: object
                                               kms:
@@ -18819,7 +18705,7 @@ spec:
                               method:
                                 default: GET
                                 description: Method is the HTTP request type (GET
-                                  or POST). Defaults to GET.
+                                  or POST).
                                 enum:
                                 - GET
                                 - POST
@@ -20003,7 +19889,7 @@ spec:
                                         method:
                                           default: GET
                                           description: Method is the HTTP request
-                                            type (GET or POST). Defaults to GET.
+                                            type (GET or POST).
                                           enum:
                                           - GET
                                           - POST
@@ -20343,7 +20229,7 @@ spec:
                                         method:
                                           default: GET
                                           description: Method is the HTTP request
-                                            type (GET or POST). Defaults to GET.
+                                            type (GET or POST).
                                           enum:
                                           - GET
                                           - POST
@@ -21090,7 +20976,7 @@ spec:
                                         method:
                                           default: GET
                                           description: Method is the HTTP request
-                                            type (GET or POST). Defaults to GET.
+                                            type (GET or POST).
                                           enum:
                                           - GET
                                           - POST
@@ -21435,12 +21321,6 @@ spec:
                                                     used to validate SCTs against
                                                     a custom source.
                                                   type: string
-                                                tsaCertChain:
-                                                  description: |-
-                                                    TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                    contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                    may contain the leaf TSA certificate if not present in the timestamurce.
-                                                  type: string
                                               type: object
                                             rekor:
                                               description: |-
@@ -21490,12 +21370,6 @@ spec:
                                                   description: PubKey, if set, is
                                                     used to validate SCTs against
                                                     a custom source.
-                                                  type: string
-                                                tsaCertChain:
-                                                  description: |-
-                                                    TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                    contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                    may contain the leaf TSA certificate if not present in the timestamurce.
                                                   type: string
                                               type: object
                                             issuer:
@@ -21552,12 +21426,6 @@ spec:
                                                   description: PubKey, if set, is
                                                     used to validate SCTs against
                                                     a custom source.
-                                                  type: string
-                                                tsaCertChain:
-                                                  description: |-
-                                                    TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                    contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                    may contain the leaf TSA certificate if not present in the timestamurce.
                                                   type: string
                                               type: object
                                             kms:
@@ -21843,12 +21711,6 @@ spec:
                                                         is used to validate SCTs against
                                                         a custom source.
                                                       type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
-                                                      type: string
                                                   type: object
                                                 rekor:
                                                   description: |-
@@ -21898,12 +21760,6 @@ spec:
                                                       description: PubKey, if set,
                                                         is used to validate SCTs against
                                                         a custom source.
-                                                      type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
                                                       type: string
                                                   type: object
                                                 issuer:
@@ -21960,12 +21816,6 @@ spec:
                                                       description: PubKey, if set,
                                                         is used to validate SCTs against
                                                         a custom source.
-                                                      type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
                                                       type: string
                                                   type: object
                                                 kms:
@@ -22221,12 +22071,6 @@ spec:
                                                   to validate SCTs against a custom
                                                   source.
                                                 type: string
-                                              tsaCertChain:
-                                                description: |-
-                                                  TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                  contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                  may contain the leaf TSA certificate if not present in the timestamurce.
-                                                type: string
                                             type: object
                                           rekor:
                                             description: |-
@@ -22275,12 +22119,6 @@ spec:
                                                 description: PubKey, if set, is used
                                                   to validate SCTs against a custom
                                                   source.
-                                                type: string
-                                              tsaCertChain:
-                                                description: |-
-                                                  TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                  contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                  may contain the leaf TSA certificate if not present in the timestamurce.
                                                 type: string
                                             type: object
                                           issuer:
@@ -22336,12 +22174,6 @@ spec:
                                                 description: PubKey, if set, is used
                                                   to validate SCTs against a custom
                                                   source.
-                                                type: string
-                                              tsaCertChain:
-                                                description: |-
-                                                  TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                  contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                  may contain the leaf TSA certificate if not present in the timestamurce.
                                                 type: string
                                             type: object
                                           kms:
@@ -22753,7 +22585,7 @@ spec:
                                   method:
                                     default: GET
                                     description: Method is the HTTP request type (GET
-                                      or POST). Defaults to GET.
+                                      or POST).
                                     enum:
                                     - GET
                                     - POST
@@ -24347,7 +24179,7 @@ spec:
                                             method:
                                               default: GET
                                               description: Method is the HTTP request
-                                                type (GET or POST). Defaults to GET.
+                                                type (GET or POST).
                                               enum:
                                               - GET
                                               - POST
@@ -24695,7 +24527,7 @@ spec:
                                             method:
                                               default: GET
                                               description: Method is the HTTP request
-                                                type (GET or POST). Defaults to GET.
+                                                type (GET or POST).
                                               enum:
                                               - GET
                                               - POST
@@ -25277,7 +25109,7 @@ spec:
                                             method:
                                               default: GET
                                               description: Method is the HTTP request
-                                                type (GET or POST). Defaults to GET.
+                                                type (GET or POST).
                                               enum:
                                               - GET
                                               - POST
@@ -25630,12 +25462,6 @@ spec:
                                                         is used to validate SCTs against
                                                         a custom source.
                                                       type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
-                                                      type: string
                                                   type: object
                                                 rekor:
                                                   description: |-
@@ -25685,12 +25511,6 @@ spec:
                                                       description: PubKey, if set,
                                                         is used to validate SCTs against
                                                         a custom source.
-                                                      type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
                                                       type: string
                                                   type: object
                                                 issuer:
@@ -25747,12 +25567,6 @@ spec:
                                                       description: PubKey, if set,
                                                         is used to validate SCTs against
                                                         a custom source.
-                                                      type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
                                                       type: string
                                                   type: object
                                                 kms:
@@ -26052,12 +25866,6 @@ spec:
                                                             SCTs against a custom
                                                             source.
                                                           type: string
-                                                        tsaCertChain:
-                                                          description: |-
-                                                            TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                            contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                            may contain the leaf TSA certificate if not present in the timestamurce.
-                                                          type: string
                                                       type: object
                                                     rekor:
                                                       description: |-
@@ -26109,12 +25917,6 @@ spec:
                                                             set, is used to validate
                                                             SCTs against a custom
                                                             source.
-                                                          type: string
-                                                        tsaCertChain:
-                                                          description: |-
-                                                            TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                            contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                            may contain the leaf TSA certificate if not present in the timestamurce.
                                                           type: string
                                                       type: object
                                                     issuer:
@@ -26174,12 +25976,6 @@ spec:
                                                             set, is used to validate
                                                             SCTs against a custom
                                                             source.
-                                                          type: string
-                                                        tsaCertChain:
-                                                          description: |-
-                                                            TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                            contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                            may contain the leaf TSA certificate if not present in the timestamurce.
                                                           type: string
                                                       type: object
                                                     kms:
@@ -26437,12 +26233,6 @@ spec:
                                                       used to validate SCTs against
                                                       a custom source.
                                                     type: string
-                                                  tsaCertChain:
-                                                    description: |-
-                                                      TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                      contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                      may contain the leaf TSA certificate if not present in the timestamurce.
-                                                    type: string
                                                 type: object
                                               rekor:
                                                 description: |-
@@ -26492,12 +26282,6 @@ spec:
                                                     description: PubKey, if set, is
                                                       used to validate SCTs against
                                                       a custom source.
-                                                    type: string
-                                                  tsaCertChain:
-                                                    description: |-
-                                                      TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                      contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                      may contain the leaf TSA certificate if not present in the timestamurce.
                                                     type: string
                                                 type: object
                                               issuer:
@@ -26554,12 +26338,6 @@ spec:
                                                     description: PubKey, if set, is
                                                       used to validate SCTs against
                                                       a custom source.
-                                                    type: string
-                                                  tsaCertChain:
-                                                    description: |-
-                                                      TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                      contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                      may contain the leaf TSA certificate if not present in the timestamurce.
                                                     type: string
                                                 type: object
                                               kms:
@@ -26871,10 +26649,10 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: kyverno-crds
-    app.kubernetes.io/version: v0.0.0
-    helm.sh/chart: crds-v0.0.0
+    app.kubernetes.io/version: 3.2.1
+    helm.sh/chart: crds-3.2.1
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: globalcontextentries.kyverno.io
 spec:
   group: kyverno.io
@@ -26956,8 +26734,7 @@ spec:
                     type: array
                   method:
                     default: GET
-                    description: Method is the HTTP request type (GET or POST). Defaults
-                      to GET.
+                    description: Method is the HTTP request type (GET or POST).
                     enum:
                     - GET
                     - POST
@@ -27020,10 +26797,6 @@ spec:
                   version:
                     description: Version defines the version of the resource.
                     type: string
-                required:
-                - group
-                - resource
-                - version
                 type: object
             type: object
           status:
@@ -27125,10 +26898,10 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: kyverno-crds
-    app.kubernetes.io/version: v0.0.0
-    helm.sh/chart: crds-v0.0.0
+    app.kubernetes.io/version: 3.2.1
+    helm.sh/chart: crds-3.2.1
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: policies.kyverno.io
 spec:
   group: kyverno.io
@@ -27354,7 +27127,7 @@ spec:
                               method:
                                 default: GET
                                 description: Method is the HTTP request type (GET
-                                  or POST). Defaults to GET.
+                                  or POST).
                                 enum:
                                 - GET
                                 - POST
@@ -28934,7 +28707,7 @@ spec:
                                         method:
                                           default: GET
                                           description: Method is the HTTP request
-                                            type (GET or POST). Defaults to GET.
+                                            type (GET or POST).
                                           enum:
                                           - GET
                                           - POST
@@ -29274,7 +29047,7 @@ spec:
                                         method:
                                           default: GET
                                           description: Method is the HTTP request
-                                            type (GET or POST). Defaults to GET.
+                                            type (GET or POST).
                                           enum:
                                           - GET
                                           - POST
@@ -29845,7 +29618,7 @@ spec:
                                         method:
                                           default: GET
                                           description: Method is the HTTP request
-                                            type (GET or POST). Defaults to GET.
+                                            type (GET or POST).
                                           enum:
                                           - GET
                                           - POST
@@ -30190,12 +29963,6 @@ spec:
                                                     used to validate SCTs against
                                                     a custom source.
                                                   type: string
-                                                tsaCertChain:
-                                                  description: |-
-                                                    TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                    contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                    may contain the leaf TSA certificate if not present in the timestamurce.
-                                                  type: string
                                               type: object
                                             rekor:
                                               description: |-
@@ -30245,12 +30012,6 @@ spec:
                                                   description: PubKey, if set, is
                                                     used to validate SCTs against
                                                     a custom source.
-                                                  type: string
-                                                tsaCertChain:
-                                                  description: |-
-                                                    TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                    contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                    may contain the leaf TSA certificate if not present in the timestamurce.
                                                   type: string
                                               type: object
                                             issuer:
@@ -30307,12 +30068,6 @@ spec:
                                                   description: PubKey, if set, is
                                                     used to validate SCTs against
                                                     a custom source.
-                                                  type: string
-                                                tsaCertChain:
-                                                  description: |-
-                                                    TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                    contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                    may contain the leaf TSA certificate if not present in the timestamurce.
                                                   type: string
                                               type: object
                                             kms:
@@ -30609,12 +30364,6 @@ spec:
                                                         is used to validate SCTs against
                                                         a custom source.
                                                       type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
-                                                      type: string
                                                   type: object
                                                 rekor:
                                                   description: |-
@@ -30664,12 +30413,6 @@ spec:
                                                       description: PubKey, if set,
                                                         is used to validate SCTs against
                                                         a custom source.
-                                                      type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
                                                       type: string
                                                   type: object
                                                 issuer:
@@ -30726,12 +30469,6 @@ spec:
                                                       description: PubKey, if set,
                                                         is used to validate SCTs against
                                                         a custom source.
-                                                      type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
                                                       type: string
                                                   type: object
                                                 kms:
@@ -30987,12 +30724,6 @@ spec:
                                                   to validate SCTs against a custom
                                                   source.
                                                 type: string
-                                              tsaCertChain:
-                                                description: |-
-                                                  TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                  contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                  may contain the leaf TSA certificate if not present in the timestamurce.
-                                                type: string
                                             type: object
                                           rekor:
                                             description: |-
@@ -31041,12 +30772,6 @@ spec:
                                                 description: PubKey, if set, is used
                                                   to validate SCTs against a custom
                                                   source.
-                                                type: string
-                                              tsaCertChain:
-                                                description: |-
-                                                  TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                  contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                  may contain the leaf TSA certificate if not present in the timestamurce.
                                                 type: string
                                             type: object
                                           issuer:
@@ -31102,12 +30827,6 @@ spec:
                                                 description: PubKey, if set, is used
                                                   to validate SCTs against a custom
                                                   source.
-                                                type: string
-                                              tsaCertChain:
-                                                description: |-
-                                                  TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                  contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                  may contain the leaf TSA certificate if not present in the timestamurce.
                                                 type: string
                                             type: object
                                           kms:
@@ -31535,7 +31254,7 @@ spec:
                                   method:
                                     default: GET
                                     description: Method is the HTTP request type (GET
-                                      or POST). Defaults to GET.
+                                      or POST).
                                     enum:
                                     - GET
                                     - POST
@@ -33129,7 +32848,7 @@ spec:
                                             method:
                                               default: GET
                                               description: Method is the HTTP request
-                                                type (GET or POST). Defaults to GET.
+                                                type (GET or POST).
                                               enum:
                                               - GET
                                               - POST
@@ -33477,7 +33196,7 @@ spec:
                                             method:
                                               default: GET
                                               description: Method is the HTTP request
-                                                type (GET or POST). Defaults to GET.
+                                                type (GET or POST).
                                               enum:
                                               - GET
                                               - POST
@@ -34059,7 +33778,7 @@ spec:
                                             method:
                                               default: GET
                                               description: Method is the HTTP request
-                                                type (GET or POST). Defaults to GET.
+                                                type (GET or POST).
                                               enum:
                                               - GET
                                               - POST
@@ -34412,12 +34131,6 @@ spec:
                                                         is used to validate SCTs against
                                                         a custom source.
                                                       type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
-                                                      type: string
                                                   type: object
                                                 rekor:
                                                   description: |-
@@ -34467,12 +34180,6 @@ spec:
                                                       description: PubKey, if set,
                                                         is used to validate SCTs against
                                                         a custom source.
-                                                      type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
                                                       type: string
                                                   type: object
                                                 issuer:
@@ -34529,12 +34236,6 @@ spec:
                                                       description: PubKey, if set,
                                                         is used to validate SCTs against
                                                         a custom source.
-                                                      type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
                                                       type: string
                                                   type: object
                                                 kms:
@@ -34834,12 +34535,6 @@ spec:
                                                             SCTs against a custom
                                                             source.
                                                           type: string
-                                                        tsaCertChain:
-                                                          description: |-
-                                                            TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                            contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                            may contain the leaf TSA certificate if not present in the timestamurce.
-                                                          type: string
                                                       type: object
                                                     rekor:
                                                       description: |-
@@ -34891,12 +34586,6 @@ spec:
                                                             set, is used to validate
                                                             SCTs against a custom
                                                             source.
-                                                          type: string
-                                                        tsaCertChain:
-                                                          description: |-
-                                                            TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                            contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                            may contain the leaf TSA certificate if not present in the timestamurce.
                                                           type: string
                                                       type: object
                                                     issuer:
@@ -34956,12 +34645,6 @@ spec:
                                                             set, is used to validate
                                                             SCTs against a custom
                                                             source.
-                                                          type: string
-                                                        tsaCertChain:
-                                                          description: |-
-                                                            TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                            contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                            may contain the leaf TSA certificate if not present in the timestamurce.
                                                           type: string
                                                       type: object
                                                     kms:
@@ -35219,12 +34902,6 @@ spec:
                                                       used to validate SCTs against
                                                       a custom source.
                                                     type: string
-                                                  tsaCertChain:
-                                                    description: |-
-                                                      TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                      contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                      may contain the leaf TSA certificate if not present in the timestamurce.
-                                                    type: string
                                                 type: object
                                               rekor:
                                                 description: |-
@@ -35274,12 +34951,6 @@ spec:
                                                     description: PubKey, if set, is
                                                       used to validate SCTs against
                                                       a custom source.
-                                                    type: string
-                                                  tsaCertChain:
-                                                    description: |-
-                                                      TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                      contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                      may contain the leaf TSA certificate if not present in the timestamurce.
                                                     type: string
                                                 type: object
                                               issuer:
@@ -35336,12 +35007,6 @@ spec:
                                                     description: PubKey, if set, is
                                                       used to validate SCTs against
                                                       a custom source.
-                                                    type: string
-                                                  tsaCertChain:
-                                                    description: |-
-                                                      TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                      contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                      may contain the leaf TSA certificate if not present in the timestamurce.
                                                     type: string
                                                 type: object
                                               kms:
@@ -35854,7 +35519,7 @@ spec:
                               method:
                                 default: GET
                                 description: Method is the HTTP request type (GET
-                                  or POST). Defaults to GET.
+                                  or POST).
                                 enum:
                                 - GET
                                 - POST
@@ -37038,7 +36703,7 @@ spec:
                                         method:
                                           default: GET
                                           description: Method is the HTTP request
-                                            type (GET or POST). Defaults to GET.
+                                            type (GET or POST).
                                           enum:
                                           - GET
                                           - POST
@@ -37378,7 +37043,7 @@ spec:
                                         method:
                                           default: GET
                                           description: Method is the HTTP request
-                                            type (GET or POST). Defaults to GET.
+                                            type (GET or POST).
                                           enum:
                                           - GET
                                           - POST
@@ -38125,7 +37790,7 @@ spec:
                                         method:
                                           default: GET
                                           description: Method is the HTTP request
-                                            type (GET or POST). Defaults to GET.
+                                            type (GET or POST).
                                           enum:
                                           - GET
                                           - POST
@@ -38470,12 +38135,6 @@ spec:
                                                     used to validate SCTs against
                                                     a custom source.
                                                   type: string
-                                                tsaCertChain:
-                                                  description: |-
-                                                    TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                    contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                    may contain the leaf TSA certificate if not present in the timestamurce.
-                                                  type: string
                                               type: object
                                             rekor:
                                               description: |-
@@ -38525,12 +38184,6 @@ spec:
                                                   description: PubKey, if set, is
                                                     used to validate SCTs against
                                                     a custom source.
-                                                  type: string
-                                                tsaCertChain:
-                                                  description: |-
-                                                    TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                    contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                    may contain the leaf TSA certificate if not present in the timestamurce.
                                                   type: string
                                               type: object
                                             issuer:
@@ -38587,12 +38240,6 @@ spec:
                                                   description: PubKey, if set, is
                                                     used to validate SCTs against
                                                     a custom source.
-                                                  type: string
-                                                tsaCertChain:
-                                                  description: |-
-                                                    TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                    contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                    may contain the leaf TSA certificate if not present in the timestamurce.
                                                   type: string
                                               type: object
                                             kms:
@@ -38878,12 +38525,6 @@ spec:
                                                         is used to validate SCTs against
                                                         a custom source.
                                                       type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
-                                                      type: string
                                                   type: object
                                                 rekor:
                                                   description: |-
@@ -38933,12 +38574,6 @@ spec:
                                                       description: PubKey, if set,
                                                         is used to validate SCTs against
                                                         a custom source.
-                                                      type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
                                                       type: string
                                                   type: object
                                                 issuer:
@@ -38995,12 +38630,6 @@ spec:
                                                       description: PubKey, if set,
                                                         is used to validate SCTs against
                                                         a custom source.
-                                                      type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
                                                       type: string
                                                   type: object
                                                 kms:
@@ -39256,12 +38885,6 @@ spec:
                                                   to validate SCTs against a custom
                                                   source.
                                                 type: string
-                                              tsaCertChain:
-                                                description: |-
-                                                  TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                  contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                  may contain the leaf TSA certificate if not present in the timestamurce.
-                                                type: string
                                             type: object
                                           rekor:
                                             description: |-
@@ -39310,12 +38933,6 @@ spec:
                                                 description: PubKey, if set, is used
                                                   to validate SCTs against a custom
                                                   source.
-                                                type: string
-                                              tsaCertChain:
-                                                description: |-
-                                                  TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                  contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                  may contain the leaf TSA certificate if not present in the timestamurce.
                                                 type: string
                                             type: object
                                           issuer:
@@ -39371,12 +38988,6 @@ spec:
                                                 description: PubKey, if set, is used
                                                   to validate SCTs against a custom
                                                   source.
-                                                type: string
-                                              tsaCertChain:
-                                                description: |-
-                                                  TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                  contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                  may contain the leaf TSA certificate if not present in the timestamurce.
                                                 type: string
                                             type: object
                                           kms:
@@ -39788,7 +39399,7 @@ spec:
                                   method:
                                     default: GET
                                     description: Method is the HTTP request type (GET
-                                      or POST). Defaults to GET.
+                                      or POST).
                                     enum:
                                     - GET
                                     - POST
@@ -41382,7 +40993,7 @@ spec:
                                             method:
                                               default: GET
                                               description: Method is the HTTP request
-                                                type (GET or POST). Defaults to GET.
+                                                type (GET or POST).
                                               enum:
                                               - GET
                                               - POST
@@ -41730,7 +41341,7 @@ spec:
                                             method:
                                               default: GET
                                               description: Method is the HTTP request
-                                                type (GET or POST). Defaults to GET.
+                                                type (GET or POST).
                                               enum:
                                               - GET
                                               - POST
@@ -42312,7 +41923,7 @@ spec:
                                             method:
                                               default: GET
                                               description: Method is the HTTP request
-                                                type (GET or POST). Defaults to GET.
+                                                type (GET or POST).
                                               enum:
                                               - GET
                                               - POST
@@ -42665,12 +42276,6 @@ spec:
                                                         is used to validate SCTs against
                                                         a custom source.
                                                       type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
-                                                      type: string
                                                   type: object
                                                 rekor:
                                                   description: |-
@@ -42720,12 +42325,6 @@ spec:
                                                       description: PubKey, if set,
                                                         is used to validate SCTs against
                                                         a custom source.
-                                                      type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
                                                       type: string
                                                   type: object
                                                 issuer:
@@ -42782,12 +42381,6 @@ spec:
                                                       description: PubKey, if set,
                                                         is used to validate SCTs against
                                                         a custom source.
-                                                      type: string
-                                                    tsaCertChain:
-                                                      description: |-
-                                                        TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                        contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                        may contain the leaf TSA certificate if not present in the timestamurce.
                                                       type: string
                                                   type: object
                                                 kms:
@@ -43087,12 +42680,6 @@ spec:
                                                             SCTs against a custom
                                                             source.
                                                           type: string
-                                                        tsaCertChain:
-                                                          description: |-
-                                                            TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                            contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                            may contain the leaf TSA certificate if not present in the timestamurce.
-                                                          type: string
                                                       type: object
                                                     rekor:
                                                       description: |-
@@ -43144,12 +42731,6 @@ spec:
                                                             set, is used to validate
                                                             SCTs against a custom
                                                             source.
-                                                          type: string
-                                                        tsaCertChain:
-                                                          description: |-
-                                                            TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                            contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                            may contain the leaf TSA certificate if not present in the timestamurce.
                                                           type: string
                                                       type: object
                                                     issuer:
@@ -43209,12 +42790,6 @@ spec:
                                                             set, is used to validate
                                                             SCTs against a custom
                                                             source.
-                                                          type: string
-                                                        tsaCertChain:
-                                                          description: |-
-                                                            TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                            contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                            may contain the leaf TSA certificate if not present in the timestamurce.
                                                           type: string
                                                       type: object
                                                     kms:
@@ -43472,12 +43047,6 @@ spec:
                                                       used to validate SCTs against
                                                       a custom source.
                                                     type: string
-                                                  tsaCertChain:
-                                                    description: |-
-                                                      TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                      contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                      may contain the leaf TSA certificate if not present in the timestamurce.
-                                                    type: string
                                                 type: object
                                               rekor:
                                                 description: |-
@@ -43527,12 +43096,6 @@ spec:
                                                     description: PubKey, if set, is
                                                       used to validate SCTs against
                                                       a custom source.
-                                                    type: string
-                                                  tsaCertChain:
-                                                    description: |-
-                                                      TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                      contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                      may contain the leaf TSA certificate if not present in the timestamurce.
                                                     type: string
                                                 type: object
                                               issuer:
@@ -43589,12 +43152,6 @@ spec:
                                                     description: PubKey, if set, is
                                                       used to validate SCTs against
                                                       a custom source.
-                                                    type: string
-                                                  tsaCertChain:
-                                                    description: |-
-                                                      TSACertChain, if set, is the PEM-encoded certificate chain file for the RFC3161 timestamp authority. Must
-                                                      contain the root CA certificate. Optionally may contain intermediate CA certificates, and
-                                                      may contain the leaf TSA certificate if not present in the timestamurce.
                                                     type: string
                                                 type: object
                                               kms:
@@ -43906,10 +43463,10 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: kyverno-crds
-    app.kubernetes.io/version: v0.0.0
-    helm.sh/chart: crds-v0.0.0
+    app.kubernetes.io/version: 3.2.1
+    helm.sh/chart: crds-3.2.1
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: policyexceptions.kyverno.io
 spec:
   group: kyverno.io
@@ -45793,10 +45350,10 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: kyverno-crds
-    app.kubernetes.io/version: v0.0.0
-    helm.sh/chart: crds-v0.0.0
+    app.kubernetes.io/version: 3.2.1
+    helm.sh/chart: crds-3.2.1
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: updaterequests.kyverno.io
 spec:
   group: kyverno.io
@@ -46577,10 +46134,10 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: kyverno-crds
-    app.kubernetes.io/version: v0.0.0
-    helm.sh/chart: crds-v0.0.0
+    app.kubernetes.io/version: 3.2.1
+    helm.sh/chart: crds-3.2.1
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: clusterephemeralreports.reports.kyverno.io
 spec:
   group: reports.kyverno.io
@@ -46934,10 +46491,10 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: kyverno-crds
-    app.kubernetes.io/version: v0.0.0
-    helm.sh/chart: crds-v0.0.0
+    app.kubernetes.io/version: 3.2.1
+    helm.sh/chart: crds-3.2.1
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: ephemeralreports.reports.kyverno.io
 spec:
   group: reports.kyverno.io
@@ -47291,10 +46848,10 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: kyverno-crds
-    app.kubernetes.io/version: v0.0.0
-    helm.sh/chart: crds-v0.0.0
+    app.kubernetes.io/version: 3.2.1
+    helm.sh/chart: crds-3.2.1
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: clusterpolicyreports.wgpolicyk8s.io
 spec:
   group: wgpolicyk8s.io
@@ -47673,10 +47230,10 @@ metadata:
     app.kubernetes.io/instance: kyverno
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/part-of: kyverno-crds
-    app.kubernetes.io/version: v0.0.0
-    helm.sh/chart: crds-v0.0.0
+    app.kubernetes.io/version: 3.2.1
+    helm.sh/chart: crds-3.2.1
   annotations:
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: policyreports.wgpolicyk8s.io
 spec:
   group: wgpolicyk8s.io

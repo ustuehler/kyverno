@@ -9,7 +9,7 @@ metadata:
     {{- with .Values.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
-    controller-gen.kubebuilder.io/version: v0.14.0
+    controller-gen.kubebuilder.io/version: v0.15.0
   name: clustercleanuppolicies.kyverno.io
 spec:
   group: kyverno.io
@@ -192,7 +192,6 @@ spec:
                         method:
                           default: GET
                           description: Method is the HTTP request type (GET or POST).
-                            Defaults to GET.
                           enum:
                           - GET
                           - POST
@@ -1412,7 +1411,6 @@ spec:
                         method:
                           default: GET
                           description: Method is the HTTP request type (GET or POST).
-                            Defaults to GET.
                           enum:
                           - GET
                           - POST
@@ -2632,7 +2630,6 @@ spec:
                         method:
                           default: GET
                           description: Method is the HTTP request type (GET or POST).
-                            Defaults to GET.
                           enum:
                           - GET
                           - POST

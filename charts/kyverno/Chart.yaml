@@ -1,8 +1,8 @@
 apiVersion: v2
 type: application
 name: kyverno
-version: v0.0.0
-appVersion: latest
+version: 3.2.1
+appVersion: v1.12.1
 icon: https://github.com/kyverno/kyverno/raw/main/img/logo.png
 description: Kubernetes Native Policy Management
 keywords:
@@ -41,10 +41,12 @@ annotations:
       description: Add podLabels to the post-upgrade hook
     - kind: added
       description: Add podLabels to the pre-delete hook
+    - kind: fixed
+      description: Ensure CA certificate config maps are created when data is provided
 dependencies:
   - name: grafana
-    version: v0.0.0
+    version: 3.2.1
     condition: grafana.enabled
   - name: crds
-    version: v0.0.0
+    version: 3.2.1
     condition: crds.install
