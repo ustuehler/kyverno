@@ -56,13 +56,6 @@ type ImageVerification struct {
 	// +kubebuilder:validation:Optional
 	ImageReferences []string `json:"imageReferences,omitempty" yaml:"imageReferences,omitempty"`
 
-	// SkipImageReferences is a list of matching image reference patterns that should be skipped.
-	// At least one pattern in the list must match the image for the rule to be skipped. Each image reference
-	// consists of a registry address (defaults to docker.io), repository, image, and tag (defaults to latest).
-	// Wildcards ('*' and '?') are allowed. See: https://kubernetes.io/docs/concepts/containers/images.
-	// +kubebuilder:validation:Optional
-	SkipImageReferences []string `json:"skipImageReferences,omitempty" yaml:"skipImageReferences,omitempty"`
-
 	// Deprecated. Use StaticKeyAttestor instead.
 	Key string `json:"key,omitempty" yaml:"key,omitempty"`
 
@@ -262,7 +255,7 @@ type KeylessAttestor struct {
 
 type Rekor struct {
 	// URL is the address of the transparency log. Defaults to the public Rekor log instance https://rekor.sigstore.dev.
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Required
 	// +kubebuilder:Default:=https://rekor.sigstore.dev
 	URL string `json:"url" yaml:"url"`
 

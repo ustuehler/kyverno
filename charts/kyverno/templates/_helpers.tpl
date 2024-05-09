@@ -46,16 +46,13 @@
 {{- with .generateValidatingAdmissionPolicy -}}
   {{- $flags = append $flags (print "--generateValidatingAdmissionPolicy=" .enabled) -}}
 {{- end -}}
-{{- with .globalContext -}}
-  {{- $flags = append $flags (print "--maxAPICallResponseLength=" (int .maxApiCallResponseLength)) -}}
-{{- end -}}
 {{- with .logging -}}
   {{- $flags = append $flags (print "--loggingFormat=" .format) -}}
   {{- $flags = append $flags (print "--v=" (join "," .verbosity)) -}}
 {{- end -}}
 {{- with .omitEvents -}}
   {{- with .eventTypes -}}
-    {{- $flags = append $flags (print "--omitEvents=" (join "," .)) -}}
+    {{- $flags = append $flags (print "--omit-events=" (join "," .)) -}}
   {{- end -}}
 {{- end -}}
 {{- with .policyExceptions -}}

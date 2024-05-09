@@ -19,20 +19,15 @@ import (
 	"github.com/kyverno/kyverno/pkg/controllers/cleanup"
 	genericloggingcontroller "github.com/kyverno/kyverno/pkg/controllers/generic/logging"
 	genericwebhookcontroller "github.com/kyverno/kyverno/pkg/controllers/generic/webhook"
-	globalcontextcontroller "github.com/kyverno/kyverno/pkg/controllers/globalcontext"
 	ttlcontroller "github.com/kyverno/kyverno/pkg/controllers/ttl"
 	"github.com/kyverno/kyverno/pkg/event"
-	"github.com/kyverno/kyverno/pkg/globalcontext/store"
 	"github.com/kyverno/kyverno/pkg/informers"
 	"github.com/kyverno/kyverno/pkg/leaderelection"
 	"github.com/kyverno/kyverno/pkg/logging"
 	"github.com/kyverno/kyverno/pkg/tls"
-	"github.com/kyverno/kyverno/pkg/toggle"
-	kubeutils "github.com/kyverno/kyverno/pkg/utils/kube"
 	"github.com/kyverno/kyverno/pkg/webhooks"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
-	apiserver "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubeinformers "k8s.io/client-go/informers"
 )
@@ -64,33 +59,22 @@ func (probes) IsLive(context.Context) bool {
 	return true
 }
 
-func sanityChecks(apiserverClient apiserver.Interface) error {
-	return kubeutils.CRDsInstalled(apiserverClient, "cleanuppolicies.kyverno.io", "clustercleanuppolicies.kyverno.io")
-}
-
 func main() {
 	var (
-		dumpPayload              bool
-		serverIP                 string
-		servicePort              int
-		webhookServerPort        int
-		maxQueuedEvents          int
-		interval                 time.Duration
-		renewBefore              time.Duration
-		maxAPICallResponseLength int64
+		dumpPayload     bool
+		serverIP        string
+		servicePort     int
+		maxQueuedEvents int
+		interval        time.Duration
 	)
 	flagset := flag.NewFlagSet("cleanup-controller", flag.ExitOnError)
 	flagset.BoolVar(&dumpPayload, "dumpPayload", false, "Set this flag to activate/deactivate debug mode.")
 	flagset.StringVar(&serverIP, "serverIP", "", "IP address where Kyverno controller runs. Only required if out-of-cluster.")
 	flagset.IntVar(&servicePort, "servicePort", 443, "Port used by the Kyverno Service resource and for webhook configurations.")
-	flagset.IntVar(&webhookServerPort, "webhookServerPort", 9443, "Port used by the webhook server.")
 	flagset.IntVar(&maxQueuedEvents, "maxQueuedEvents", 1000, "Maximum events to be queued.")
 	flagset.DurationVar(&interval, "ttlReconciliationInterval", time.Minute, "Set this flag to set the interval after which the resource controller reconciliation should occur")
-	flagset.Func(toggle.ProtectManagedResourcesFlagName, toggle.ProtectManagedResourcesDescription, toggle.ProtectManagedResources.Parse)
 	flagset.StringVar(&caSecretName, "caSecretName", "", "Name of the secret containing CA.")
 	flagset.StringVar(&tlsSecretName, "tlsSecretName", "", "Name of the secret containing TLS pair.")
-	flagset.DurationVar(&renewBefore, "renewBefore", 15*24*time.Hour, "The certificate renewal time before expiration")
-	flagset.Int64Var(&maxAPICallResponseLength, "maxAPICallResponseLength", 2*1000*1000, "Maximum allowed response size from API Calls. A value of 0 bypasses checks (not recommended).")
 	// config
 	appConfig := internal.NewConfiguration(
 		internal.WithProfiling(),
@@ -100,11 +84,9 @@ func main() {
 		internal.WithLeaderElection(),
 		internal.WithKyvernoClient(),
 		internal.WithKyvernoDynamicClient(),
-		internal.WithEventsClient(),
 		internal.WithConfigMapCaching(),
 		internal.WithDeferredLoading(),
 		internal.WithMetadataClient(),
-		internal.WithApiServerClient(),
 		internal.WithFlagSets(flagset),
 	)
 	// parse flags
@@ -120,10 +102,6 @@ func main() {
 		setup.Logger.Error(errors.New("exiting... tlsSecretName is a required flag"), "exiting... tlsSecretName is a required flag")
 		os.Exit(1)
 	}
-	if err := sanityChecks(setup.ApiServerClient); err != nil {
-		setup.Logger.Error(err, "sanity checks failed")
-		os.Exit(1)
-	}
 	// certificates informers
 	caSecret := informers.NewSecretInformer(setup.KubeClient, config.KyvernoNamespace(), caSecretName, resyncPeriod)
 	tlsSecret := informers.NewSecretInformer(setup.KubeClient, config.KyvernoNamespace(), tlsSecretName, resyncPeriod)
@@ -135,7 +113,6 @@ func main() {
 	// informer factories
 	kubeInformer := kubeinformers.NewSharedInformerFactoryWithOptions(setup.KubeClient, resyncPeriod)
 	kyvernoInformer := kyvernoinformer.NewSharedInformerFactory(setup.KyvernoClient, resyncPeriod)
-	var wg sync.WaitGroup
 	// listers
 	nsLister := kubeInformer.Core().V1().Namespaces().Lister()
 	// log policy changes
@@ -151,33 +128,20 @@ func main() {
 		kyvernoInformer.Kyverno().V2beta1().ClusterCleanupPolicies(),
 		genericloggingcontroller.CheckGeneration,
 	)
-	eventGenerator := event.NewEventGenerator(
-		setup.EventsClient,
+	eventGenerator := event.NewEventCleanupGenerator(
+		setup.KyvernoDynamicClient,
+		kyvernoInformer.Kyverno().V2beta1().ClusterCleanupPolicies(),
+		kyvernoInformer.Kyverno().V2beta1().CleanupPolicies(),
+		maxQueuedEvents,
 		logging.WithName("EventGenerator"),
-	)
-	eventController := internal.NewController(
-		event.ControllerName,
-		eventGenerator,
-		event.Workers,
-	)
-	gcstore := store.New()
-	gceController := internal.NewController(
-		globalcontextcontroller.ControllerName,
-		globalcontextcontroller.NewController(
-			kyvernoInformer.Kyverno().V2alpha1().GlobalContextEntries(),
-			setup.KyvernoDynamicClient,
-			setup.KyvernoClient,
-			gcstore,
-			eventGenerator,
-			maxAPICallResponseLength,
-			false,
-		),
-		globalcontextcontroller.Workers,
 	)
 	// start informers and wait for cache sync
 	if !internal.StartInformersAndWaitForCacheSync(ctx, setup.Logger, kubeInformer, kyvernoInformer) {
 		os.Exit(1)
 	}
+	// start event generator
+	var wg sync.WaitGroup
+	go eventGenerator.Run(ctx, 3, &wg)
 	// setup leader election
 	le, err := leaderelection.New(
 		setup.Logger.WithName("leader-election"),
@@ -200,7 +164,6 @@ func main() {
 				tls.CertRenewalInterval,
 				tls.CAValidityDuration,
 				tls.TLSValidityDuration,
-				renewBefore,
 				serverIP,
 				config.KyvernoServiceName(),
 				config.DnsNames(config.KyvernoServiceName(), config.KyvernoNamespace()),
@@ -231,7 +194,6 @@ func main() {
 					config.CleanupValidatingWebhookServicePath,
 					serverIP,
 					int32(servicePort),
-					int32(webhookServerPort),
 					nil,
 					[]admissionregistrationv1.RuleWithOperations{
 						{
@@ -267,7 +229,6 @@ func main() {
 					config.TtlValidatingWebhookServicePath,
 					serverIP,
 					int32(servicePort),
-					int32(webhookServerPort),
 					&metav1.LabelSelector{
 						MatchExpressions: []metav1.LabelSelectorRequirement{
 							{
@@ -308,7 +269,6 @@ func main() {
 					cmResolver,
 					setup.Jp,
 					eventGenerator,
-					gcstore,
 				),
 				cleanup.Workers,
 			)
@@ -364,13 +324,7 @@ func main() {
 		setup.Configuration,
 	)
 	// start server
-	server.Run()
-	defer server.Stop()
-	// start non leader controllers
-	eventController.Run(ctx, setup.Logger, &wg)
-	gceController.Run(ctx, setup.Logger, &wg)
+	server.Run(ctx.Done())
 	// start leader election
 	le.Run(ctx)
-	// wait for everything to shut down and exit
-	wg.Wait()
 }

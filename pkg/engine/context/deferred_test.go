@@ -10,7 +10,7 @@ import (
 
 func TestDeferredLoaderMatch(t *testing.T) {
 	ctx := newContext()
-	mockLoader, _ := AddMockDeferredLoader(ctx, "one", "1")
+	mockLoader, _ := addDeferred(ctx, "one", "1")
 	assert.Equal(t, 0, mockLoader.invocations)
 
 	val, err := ctx.Query("one")
@@ -22,28 +22,28 @@ func TestDeferredLoaderMatch(t *testing.T) {
 	assert.Equal(t, 1, mockLoader.invocations)
 
 	ctx = newContext()
-	ml, _ := AddMockDeferredLoader(ctx, "one", "1")
+	ml, _ := addDeferred(ctx, "one", "1")
 	testCheckMatch(t, ctx, "one<two", "one", "1", ml)
 
-	ml, _ = AddMockDeferredLoader(ctx, "one", "1")
+	ml, _ = addDeferred(ctx, "one", "1")
 	testCheckMatch(t, ctx, "(one)", "one", "1", ml)
 
-	ml, _ = AddMockDeferredLoader(ctx, "one", "1")
+	ml, _ = addDeferred(ctx, "one", "1")
 	testCheckMatch(t, ctx, "one.two.three", "one", "1", ml)
 
-	ml, _ = AddMockDeferredLoader(ctx, "one", "1")
+	ml, _ = addDeferred(ctx, "one", "1")
 	testCheckMatch(t, ctx, "one-two", "one", "1", ml)
 
-	ml, _ = AddMockDeferredLoader(ctx, "one", "1")
+	ml, _ = addDeferred(ctx, "one", "1")
 	testCheckMatch(t, ctx, "one; two; three", "one", "1", ml)
 
-	ml, _ = AddMockDeferredLoader(ctx, "one", "1")
+	ml, _ = addDeferred(ctx, "one", "1")
 	testCheckMatch(t, ctx, "one>two", "one", "1", ml)
 
-	ml, _ = AddMockDeferredLoader(ctx, "one", "1")
+	ml, _ = addDeferred(ctx, "one", "1")
 	testCheckMatch(t, ctx, "one, two, three", "one", "1", ml)
 
-	ml, _ = AddMockDeferredLoader(ctx, "one1", "11")
+	ml, _ = addDeferred(ctx, "one1", "11")
 	testCheckMatch(t, ctx, "one1", "one1", "11", ml)
 }
 
@@ -64,7 +64,7 @@ func testCheckMatch(t *testing.T, ctx *context, query, name, value string, ml *m
 
 func TestDeferredLoaderMismatch(t *testing.T) {
 	ctx := newContext()
-	AddMockDeferredLoader(ctx, "one", "1")
+	addDeferred(ctx, "one", "1")
 
 	_, err := ctx.Query("oneTwoThree")
 	assert.ErrorContains(t, err, `Unknown key "oneTwoThree" in path`)
@@ -95,15 +95,98 @@ func TestDeferredLoaderMismatch(t *testing.T) {
 func newContext() *context {
 	return &context{
 		jp:                 jp,
-		jsonRaw:            make(map[string]interface{}),
-		jsonRawCheckpoints: make([]map[string]interface{}, 0),
+		jsonRaw:            []byte(`{}`),
+		jsonRawCheckpoints: make([][]byte, 0),
 		deferred:           NewDeferredLoaders(),
 	}
 }
 
+type mockLoader struct {
+	name         string
+	level        int
+	value        interface{}
+	query        string
+	hasLoaded    bool
+	invocations  int
+	eventHandler func(event string)
+	ctx          *context
+}
+
+func (ml *mockLoader) Name() string {
+	return ml.name
+}
+
+func (ml *mockLoader) SetLevel(level int) {
+	ml.level = level
+}
+
+func (ml *mockLoader) GetLevel() int {
+	return ml.level
+}
+
+func (ml *mockLoader) HasLoaded() bool {
+	return ml.hasLoaded
+}
+
+func (ml *mockLoader) LoadData() error {
+	ml.invocations++
+	ml.ctx.AddVariable(ml.name, ml.value)
+
+	// simulate a JMESPath evaluation after loading
+	if err := ml.executeQuery(); err != nil {
+		return err
+	}
+
+	ml.hasLoaded = true
+	if ml.eventHandler != nil {
+		event := fmt.Sprintf("%s=%v", ml.name, ml.value)
+		ml.eventHandler(event)
+	}
+
+	return nil
+}
+
+func (ml *mockLoader) executeQuery() error {
+	if ml.query == "" {
+		return nil
+	}
+
+	results, err := ml.ctx.Query(ml.query)
+	if err != nil {
+		return err
+	}
+
+	return ml.ctx.AddVariable(ml.name, results)
+}
+
+func (ml *mockLoader) setEventHandler(eventHandler func(string)) {
+	ml.eventHandler = eventHandler
+}
+
+func addDeferred(ctx *context, name string, value interface{}) (*mockLoader, error) {
+	return addDeferredWithQuery(ctx, name, value, "")
+}
+
+func addDeferredWithQuery(ctx *context, name string, value interface{}, query string) (*mockLoader, error) {
+	loader := &mockLoader{
+		name:  name,
+		value: value,
+		ctx:   ctx,
+		query: query,
+	}
+
+	d, err := NewDeferredLoader(name, loader, logger)
+	if err != nil {
+		return loader, err
+	}
+
+	ctx.AddDeferredLoader(d)
+	return loader, nil
+}
+
 func TestDeferredReset(t *testing.T) {
 	ctx := newContext()
-	AddMockDeferredLoader(ctx, "value", "0")
+	addDeferred(ctx, "value", "0")
 
 	ctx.Checkpoint()
 	val, err := ctx.Query("value")
@@ -120,8 +203,8 @@ func TestDeferredCheckpointRestore(t *testing.T) {
 	ctx := newContext()
 
 	ctx.Checkpoint()
-	unused, _ := AddMockDeferredLoader(ctx, "unused", "unused")
-	mock, _ := AddMockDeferredLoader(ctx, "one", "1")
+	unused, _ := addDeferred(ctx, "unused", "unused")
+	mock, _ := addDeferred(ctx, "one", "1")
 	ctx.Restore()
 	assert.Equal(t, 0, mock.invocations)
 	assert.Equal(t, 0, unused.invocations)
@@ -136,7 +219,7 @@ func TestDeferredCheckpointRestore(t *testing.T) {
 	_, err = ctx.Query("one")
 	assert.ErrorContains(t, err, "Unknown key \"one\" in path")
 
-	_, _ = AddMockDeferredLoader(ctx, "one", "1")
+	_, _ = addDeferred(ctx, "one", "1")
 	ctx.Checkpoint()
 	one, err := ctx.Query("one")
 	assert.NilError(t, err)
@@ -152,14 +235,14 @@ func TestDeferredCheckpointRestore(t *testing.T) {
 	assert.NilError(t, err)
 	assert.Equal(t, "1", one)
 
-	mock, _ = AddMockDeferredLoader(ctx, "one", "1")
+	mock, _ = addDeferred(ctx, "one", "1")
 	ctx.Checkpoint()
 	val, err := ctx.Query("one")
 	assert.NilError(t, err)
 	assert.Equal(t, "1", val)
 	assert.Equal(t, 1, mock.invocations)
 
-	mock2, _ := AddMockDeferredLoader(ctx, "two", "2")
+	mock2, _ := addDeferred(ctx, "two", "2")
 	val, err = ctx.Query("two")
 	assert.NilError(t, err)
 	assert.Equal(t, "2", val)
@@ -186,7 +269,7 @@ func TestDeferredCheckpointRestore(t *testing.T) {
 	_, err = ctx.Query("two")
 	assert.ErrorContains(t, err, `Unknown key "two" in path`)
 
-	mock3, _ := AddMockDeferredLoader(ctx, "three", "3")
+	mock3, _ := addDeferred(ctx, "three", "3")
 	val, err = ctx.Query("three")
 	assert.NilError(t, err)
 	assert.Equal(t, "3", val)
@@ -207,7 +290,7 @@ func TestDeferredCheckpointRestore(t *testing.T) {
 
 func TestDeferredForloop(t *testing.T) {
 	ctx := newContext()
-	AddMockDeferredLoader(ctx, "value", float64(-1))
+	addDeferred(ctx, "value", -1)
 
 	ctx.Checkpoint()
 	for i := 0; i < 5; i++ {
@@ -216,7 +299,7 @@ func TestDeferredForloop(t *testing.T) {
 		assert.Equal(t, float64(i-1), val)
 
 		ctx.Reset()
-		mock, _ := AddMockDeferredLoader(ctx, "value", float64(i))
+		mock, _ := addDeferred(ctx, "value", i)
 		val, err = ctx.Query("value")
 		assert.NilError(t, err)
 		assert.Equal(t, float64(i), val)
@@ -232,13 +315,13 @@ func TestDeferredForloop(t *testing.T) {
 func TestDeferredInvalidReset(t *testing.T) {
 	ctx := newContext()
 
-	AddMockDeferredLoader(ctx, "value", "0")
+	addDeferred(ctx, "value", "0")
 	ctx.Reset() // no checkpoint
 	val, err := ctx.Query("value")
 	assert.NilError(t, err)
 	assert.Equal(t, "0", val)
 
-	AddMockDeferredLoader(ctx, "value", "0")
+	addDeferred(ctx, "value", "0")
 	ctx.Restore() // no checkpoint
 	val, err = ctx.Query("value")
 	assert.NilError(t, err)
@@ -247,18 +330,18 @@ func TestDeferredInvalidReset(t *testing.T) {
 
 func TestDeferredValidResetRestore(t *testing.T) {
 	ctx := newContext()
-	AddMockDeferredLoader(ctx, "value", "0")
+	addDeferred(ctx, "value", "0")
 
 	ctx.Checkpoint()
-	AddMockDeferredLoader(ctx, "leak", "leak")
+	addDeferred(ctx, "leak", "leak")
 	ctx.Reset()
 
 	_, err := ctx.Query("leak")
 	assert.ErrorContains(t, err, `Unknown key "leak" in path`)
 
-	AddMockDeferredLoader(ctx, "value", "0")
+	addDeferred(ctx, "value", "0")
 	ctx.Checkpoint()
-	AddMockDeferredLoader(ctx, "leak", "leak")
+	addDeferred(ctx, "leak", "leak")
 	ctx.Restore()
 
 	_, err = ctx.Query("leak")
@@ -272,10 +355,10 @@ func TestDeferredSameName(t *testing.T) {
 		sequence = append(sequence, name)
 	}
 
-	mock1, _ := AddMockDeferredLoader(ctx, "value", "0")
+	mock1, _ := addDeferred(ctx, "value", "0")
 	mock1.setEventHandler(hdlr)
 
-	mock2, _ := AddMockDeferredLoader(ctx, "value", "1")
+	mock2, _ := addDeferred(ctx, "value", "1")
 	mock2.setEventHandler(hdlr)
 
 	val, err := ctx.Query("value")
@@ -300,7 +383,7 @@ func TestDeferredRecursive(t *testing.T) {
 
 func TestJMESPathDependency(t *testing.T) {
 	ctx := newContext()
-	AddMockDeferredLoader(ctx, "foo", "foo")
+	addDeferred(ctx, "foo", "foo")
 	addDeferredWithQuery(ctx, "one", "1", "foo")
 
 	val, err := ctx.Query("one")
@@ -310,10 +393,10 @@ func TestJMESPathDependency(t *testing.T) {
 
 func TestDeferredHiddenEval(t *testing.T) {
 	ctx := newContext()
-	AddMockDeferredLoader(ctx, "foo", "foo")
+	addDeferred(ctx, "foo", "foo")
 
 	ctx.Checkpoint()
-	AddMockDeferredLoader(ctx, "foo", "bar")
+	addDeferred(ctx, "foo", "bar")
 
 	val, err := ctx.Query("foo")
 	assert.NilError(t, err)
@@ -322,11 +405,11 @@ func TestDeferredHiddenEval(t *testing.T) {
 
 func TestDeferredNotHidden(t *testing.T) {
 	ctx := newContext()
-	AddMockDeferredLoader(ctx, "foo", "foo")
+	addDeferred(ctx, "foo", "foo")
 	addDeferredWithQuery(ctx, "one", "1", "foo")
 
 	ctx.Checkpoint()
-	AddMockDeferredLoader(ctx, "foo", "bar")
+	addDeferred(ctx, "foo", "bar")
 
 	val, err := ctx.Query("one")
 	assert.NilError(t, err)
@@ -335,12 +418,12 @@ func TestDeferredNotHidden(t *testing.T) {
 
 func TestDeferredNotHiddenOrdered(t *testing.T) {
 	ctx := newContext()
-	AddMockDeferredLoader(ctx, "foo", "foo")
+	addDeferred(ctx, "foo", "foo")
 	addDeferredWithQuery(ctx, "one", "1", "foo")
-	AddMockDeferredLoader(ctx, "foo", "baz")
+	addDeferred(ctx, "foo", "baz")
 
 	ctx.Checkpoint()
-	AddMockDeferredLoader(ctx, "foo", "bar")
+	addDeferred(ctx, "foo", "bar")
 	val, err := ctx.Query("one")
 	assert.NilError(t, err)
 	assert.Equal(t, "foo", val)

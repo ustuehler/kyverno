@@ -423,8 +423,7 @@ func FuzzBaselinePS(f *testing.F) {
 			rule = baselineLatestRule
 		}
 
-		levelVersion, _ := ParseVersion(rule.Level, rule.Version)
-		allowed, _ := EvaluatePod(levelVersion, rule.Exclude, pod)
+		allowed, _, _ := EvaluatePod(&rule, pod)
 		if allowPod != allowed {
 			pJson, err := json.MarshalIndent(pod, "", "")
 			if err != nil {

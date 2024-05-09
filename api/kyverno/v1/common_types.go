@@ -5,10 +5,8 @@ import (
 	"fmt"
 
 	"github.com/kyverno/kyverno/pkg/engine/variables/regex"
-	"github.com/kyverno/kyverno/pkg/pss/utils"
 	"github.com/sigstore/k8s-manifest-sigstore/pkg/k8smanifest"
 	admissionv1 "k8s.io/api/admission/v1"
-	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	"k8s.io/api/admissionregistration/v1alpha1"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -51,13 +49,6 @@ const (
 	Descending ForeachOrder = "Descending"
 )
 
-// WebhookConfiguration specifies the configuration for Kubernetes admission webhookconfiguration.
-type WebhookConfiguration struct {
-	// MatchCondition configures admission webhook matchConditions.
-	// +optional
-	MatchConditions []admissionregistrationv1.MatchCondition `json:"matchConditions,omitempty" yaml:"matchConditions,omitempty"`
-}
-
 // AnyAllConditions consists of conditions wrapped denoting a logical criteria to be fulfilled.
 // AnyConditions get fulfilled when at least one of its sub-conditions passes.
 // AllConditions get fulfilled only when all of its sub-conditions pass.
@@ -88,7 +79,7 @@ type ContextEntry struct {
 
 	// APICall is an HTTP request to the Kubernetes API server, or other JSON web service.
 	// The data returned is stored in the context with the name for the context entry.
-	APICall *ContextAPICall `json:"apiCall,omitempty" yaml:"apiCall,omitempty"`
+	APICall *APICall `json:"apiCall,omitempty" yaml:"apiCall,omitempty"`
 
 	// ImageRegistry defines requests to an OCI/Docker V2 registry to fetch image
 	// details.
@@ -96,10 +87,6 @@ type ContextEntry struct {
 
 	// Variable defines an arbitrary JMESPath context variable that can be defined inline.
 	Variable *Variable `json:"variable,omitempty" yaml:"variable,omitempty"`
-
-	// GlobalContextEntryReference is a reference to a cached global context entry.
-	// +kubebuilder:validation:Required
-	GlobalReference *GlobalContextEntryReference `json:"globalReference,omitempty" yaml:"globalReference,omitempty"`
 }
 
 // Variable defines an arbitrary JMESPath context variable that can be defined inline.
@@ -152,42 +139,20 @@ type APICall struct {
 	// The format required is the same format used by the `kubectl get --raw` command.
 	// See https://kyverno.io/docs/writing-policies/external-data-sources/#variables-from-kubernetes-api-server-calls
 	// for details.
-	// It's mutually exclusive with the Service field.
 	// +kubebuilder:validation:Optional
 	URLPath string `json:"urlPath" yaml:"urlPath"`
 
-	// Method is the HTTP request type (GET or POST). Defaults to GET.
+	// Method is the HTTP request type (GET or POST).
 	// +kubebuilder:default=GET
 	Method Method `json:"method,omitempty" yaml:"method,omitempty"`
 
-	// The data object specifies the POST data sent to the server.
-	// Only applicable when the method field is set to POST.
+	// Data specifies the POST data sent to the server.
 	// +kubebuilder:validation:Optional
 	Data []RequestData `json:"data,omitempty" yaml:"data,omitempty"`
 
-	// Service is an API call to a JSON web service.
-	// This is used for non-Kubernetes API server calls.
-	// It's mutually exclusive with the URLPath field.
+	// Service is an API call to a JSON web service
 	// +kubebuilder:validation:Optional
 	Service *ServiceCall `json:"service,omitempty" yaml:"service,omitempty"`
-}
-
-type ContextAPICall struct {
-	APICall `json:",inline" yaml:",inline"`
-
-	// JMESPath is an optional JSON Match Expression that can be used to
-	// transform the JSON response returned from the server. For example
-	// a JMESPath of "items | length(@)" applied to the API server response
-	// for the URLPath "/apis/apps/v1/deployments" will return the total count
-	// of deployments across all namespaces.
-	// +kubebuilder:validation:Optional
-	JMESPath string `json:"jmesPath,omitempty" yaml:"jmesPath,omitempty"`
-}
-
-type GlobalContextEntryReference struct {
-	// Name of the global context entry
-	// +kubebuilder:validation:Required
-	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 
 	// JMESPath is an optional JSON Match Expression that can be used to
 	// transform the JSON response returned from the server. For example
@@ -442,8 +407,8 @@ type PodSecurity struct {
 	Level api.Level `json:"level,omitempty" yaml:"level,omitempty"`
 
 	// Version defines the Pod Security Standard versions that Kubernetes supports.
-	// Allowed values are v1.19, v1.20, v1.21, v1.22, v1.23, v1.24, v1.25, v1.26, v1.27, v1.28, v1.29, latest. Defaults to latest.
-	// +kubebuilder:validation:Enum=v1.19;v1.20;v1.21;v1.22;v1.23;v1.24;v1.25;v1.26;v1.27;v1.28;v1.29;latest
+	// Allowed values are v1.19, v1.20, v1.21, v1.22, v1.23, v1.24, v1.25, v1.26, latest. Defaults to latest.
+	// +kubebuilder:validation:Enum=v1.19;v1.20;v1.21;v1.22;v1.23;v1.24;v1.25;v1.26;latest
 	// +optional
 	Version string `json:"version,omitempty" yaml:"version,omitempty"`
 
@@ -464,37 +429,6 @@ type PodSecurityStandard struct {
 	// Wildcards ('*' and '?') are allowed. See: https://kubernetes.io/docs/concepts/containers/images.
 	// +optional
 	Images []string `json:"images,omitempty" yaml:"images,omitempty"`
-
-	// RestrictedField selects the field for the given Pod Security Standard control.
-	// When not set, all restricted fields for the control are selected.
-	// +optional
-	RestrictedField string `json:"restrictedField,omitempty" yaml:"restrictedField,omitempty"`
-
-	// Values defines the allowed values that can be excluded.
-	// +optional
-	Values []string `json:"values,omitempty" yaml:"values,omitempty"`
-}
-
-func (pss *PodSecurityStandard) Validate(path *field.Path) (errs field.ErrorList) {
-	// container level control must specify images
-	if containsString(utils.PSS_container_level_control, pss.ControlName) {
-		if len(pss.Images) == 0 {
-			errs = append(errs, field.Invalid(path.Child("controlName"), pss.ControlName, "exclude.images must be specified for the container level control"))
-		}
-	} else if containsString(utils.PSS_pod_level_control, pss.ControlName) {
-		if len(pss.Images) != 0 {
-			errs = append(errs, field.Invalid(path.Child("controlName"), pss.ControlName, "exclude.images must not be specified for the pod level control"))
-		}
-	}
-
-	if pss.RestrictedField != "" && len(pss.Values) == 0 {
-		errs = append(errs, field.Forbidden(path.Child("values"), "values is required"))
-	}
-
-	if pss.RestrictedField == "" && len(pss.Values) != 0 {
-		errs = append(errs, field.Forbidden(path.Child("restrictedField"), "restrictedField is required"))
-	}
-	return errs
 }
 
 // CEL allows validation checks using the Common Expression Language (https://kubernetes.io/docs/reference/using-api/cel/).
@@ -666,13 +600,6 @@ type Generation struct {
 	// +optional
 	Synchronize bool `json:"synchronize,omitempty" yaml:"synchronize,omitempty"`
 
-	// OrphanDownstreamOnPolicyDelete controls whether generated resources should be deleted when the rule that generated
-	// them is deleted with synchronization enabled. This option is only applicable to generate rules of the data type.
-	// See https://kyverno.io/docs/writing-policies/generate/#data-examples.
-	// Defaults to "false" if not specified.
-	// +optional
-	OrphanDownstreamOnPolicyDelete bool `json:"orphanDownstreamOnPolicyDelete,omitempty" yaml:"orphanDownstreamOnPolicyDelete,omitempty"`
-
 	// Data provides the resource declaration used to populate each generated resource.
 	// At most one of Data or Clone must be specified. If neither are provided, the generated
 	// resource will be created with default data only.
@@ -722,7 +649,7 @@ func (g *Generation) Validate(path *field.Path, namespaced bool, policyNamespace
 		}
 	}
 
-	generateType, _, _ := g.GetTypeAndSyncAndOrphanDownstream()
+	generateType, _ := g.GetTypeAndSync()
 	if generateType == Data {
 		return errs
 	}
@@ -823,11 +750,11 @@ const (
 	Clone GenerateType = "Clone"
 )
 
-func (g *Generation) GetTypeAndSyncAndOrphanDownstream() (GenerateType, bool, bool) {
+func (g *Generation) GetTypeAndSync() (GenerateType, bool) {
 	if g.RawData != nil {
-		return Data, g.Synchronize, g.OrphanDownstreamOnPolicyDelete
+		return Data, g.Synchronize
 	}
-	return Clone, g.Synchronize, g.OrphanDownstreamOnPolicyDelete
+	return Clone, g.Synchronize
 }
 
 // CloneFrom provides the location of the source resource used to generate target resources.

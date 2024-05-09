@@ -6,7 +6,6 @@ import (
 	json_patch "github.com/evanphx/json-patch/v5"
 	"github.com/go-logr/logr"
 	kyvernov1 "github.com/kyverno/kyverno/api/kyverno/v1"
-	kyvernov2beta1 "github.com/kyverno/kyverno/api/kyverno/v2beta1"
 	"github.com/kyverno/kyverno/pkg/config"
 	engineapi "github.com/kyverno/kyverno/pkg/engine/api"
 	enginecontext "github.com/kyverno/kyverno/pkg/engine/context"
@@ -20,15 +19,15 @@ import (
 	jsonutils "github.com/kyverno/kyverno/pkg/utils/json"
 	"gomodules.xyz/jsonpatch/v2"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/client-go/tools/cache"
 )
 
 type mutateImageHandler struct {
-	configuration  config.Configuration
-	rclientFactory engineapi.RegistryClientFactory
-	ivCache        imageverifycache.Client
-	ivm            *engineapi.ImageVerificationMetadata
-	images         []apiutils.ImageInfo
+	configuration            config.Configuration
+	rclientFactory           engineapi.RegistryClientFactory
+	ivCache                  imageverifycache.Client
+	ivm                      *engineapi.ImageVerificationMetadata
+	images                   []apiutils.ImageInfo
+	imageSignatureRepository string
 }
 
 func NewMutateImageHandler(
@@ -39,6 +38,7 @@ func NewMutateImageHandler(
 	rclientFactory engineapi.RegistryClientFactory,
 	ivCache imageverifycache.Client,
 	ivm *engineapi.ImageVerificationMetadata,
+	imageSignatureRepository string,
 ) (handlers.Handler, error) {
 	if len(rule.VerifyImages) == 0 {
 		return nil, nil
@@ -51,11 +51,12 @@ func NewMutateImageHandler(
 		return nil, nil
 	}
 	return mutateImageHandler{
-		configuration:  configuration,
-		rclientFactory: rclientFactory,
-		ivm:            ivm,
-		ivCache:        ivCache,
-		images:         ruleImages,
+		configuration:            configuration,
+		rclientFactory:           rclientFactory,
+		ivm:                      ivm,
+		ivCache:                  ivCache,
+		images:                   ruleImages,
+		imageSignatureRepository: imageSignatureRepository,
 	}, nil
 }
 
@@ -66,23 +67,7 @@ func (h mutateImageHandler) Process(
 	resource unstructured.Unstructured,
 	rule kyvernov1.Rule,
 	contextLoader engineapi.EngineContextLoader,
-	exceptions []*kyvernov2beta1.PolicyException,
 ) (unstructured.Unstructured, []engineapi.RuleResponse) {
-	// check if there is a policy exception matches the incoming resource
-	exception := engineutils.MatchesException(exceptions, policyContext, logger)
-	if exception != nil {
-		key, err := cache.MetaNamespaceKeyFunc(exception)
-		if err != nil {
-			logger.Error(err, "failed to compute policy exception key", "namespace", exception.GetNamespace(), "name", exception.GetName())
-			return resource, handlers.WithError(rule, engineapi.Validation, "failed to compute exception key", err)
-		} else {
-			logger.V(3).Info("policy rule skipped due to policy exception", "exception", key)
-			return resource, handlers.WithResponses(
-				engineapi.RuleSkip(rule.Name, engineapi.Validation, "rule skipped due to policy exception "+key).WithException(exception),
-			)
-		}
-	}
-
 	jsonContext := policyContext.JSONContext()
 	ruleCopy, err := substituteVariables(rule, jsonContext, logger)
 	if err != nil {
@@ -99,7 +84,7 @@ func (h mutateImageHandler) Process(
 				engineapi.RuleError(rule.Name, engineapi.ImageVerify, "failed to fetch secrets", err),
 			)
 		}
-		iv := internal.NewImageVerifier(logger, rclient, h.ivCache, policyContext, *ruleCopy, h.ivm)
+		iv := internal.NewImageVerifier(logger, rclient, h.ivCache, policyContext, *ruleCopy, h.ivm, h.imageSignatureRepository)
 		patch, ruleResponse := iv.Verify(ctx, imageVerify, h.images, h.configuration)
 		patches = append(patches, patch...)
 		engineResponses = append(engineResponses, ruleResponse...)

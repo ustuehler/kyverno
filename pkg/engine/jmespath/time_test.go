@@ -25,7 +25,7 @@ func Test_TimeSince(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
-			query, err := jmespathInterface.Query(tc.test)
+			query, err := newJMESPath(cfg, tc.test)
 			assert.NilError(t, err)
 
 			res, err := query.Search("")
@@ -55,7 +55,7 @@ func Test_TimeToCron(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
-			query, err := jmespathInterface.Query(tc.test)
+			query, err := newJMESPath(cfg, tc.test)
 			assert.NilError(t, err)
 
 			res, err := query.Search("")
@@ -85,7 +85,7 @@ func Test_TimeAdd(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
-			query, err := jmespathInterface.Query(tc.test)
+			query, err := newJMESPath(cfg, tc.test)
 			assert.NilError(t, err)
 
 			res, err := query.Search("")
@@ -112,14 +112,10 @@ func Test_TimeParse(t *testing.T) {
 			test:           "time_parse('Mon Jan 02 15:04:05 MST 2006', 'Sat Jan 02 15:04:05 MST 2021')",
 			expectedResult: "2021-01-02T15:04:05Z",
 		},
-		{
-			test:           "time_parse('1702691171', '1702691171')",
-			expectedResult: "2023-12-16T01:46:11Z",
-		},
 	}
 	for i, tc := range testCases {
 		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
-			query, err := jmespathInterface.Query(tc.test)
+			query, err := newJMESPath(cfg, tc.test)
 			assert.NilError(t, err)
 
 			res, err := query.Search("")
@@ -149,7 +145,7 @@ func Test_TimeUtc(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
-			query, err := jmespathInterface.Query(tc.test)
+			query, err := newJMESPath(cfg, tc.test)
 			assert.NilError(t, err)
 
 			res, err := query.Search("")
@@ -175,7 +171,7 @@ func Test_TimeDiff(t *testing.T) {
 	}
 	for i, tc := range testCases {
 		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
-			query, err := jmespathInterface.Query(tc.test)
+			query, err := newJMESPath(cfg, tc.test)
 			assert.NilError(t, err)
 
 			res, err := query.Search("")

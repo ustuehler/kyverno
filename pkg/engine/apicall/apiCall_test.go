@@ -73,11 +73,9 @@ func Test_serviceGetRequest(t *testing.T) {
 		assert.ErrorContains(t, err, "missing APICall")
 
 		entry.Name = "test"
-		entry.APICall = &kyvernov1.ContextAPICall{
-			APICall: kyvernov1.APICall{
-				Service: &kyvernov1.ServiceCall{
-					URL: s.URL,
-				},
+		entry.APICall = &kyvernov1.APICall{
+			Service: &kyvernov1.ServiceCall{
+				URL: s.URL,
 			},
 		}
 
@@ -103,8 +101,8 @@ func Test_serviceGetRequest(t *testing.T) {
 
 		call, err = New(logr.Discard(), jp, entry, ctx, nil, apiConfigMaxSizeExceed)
 		assert.NilError(t, err)
-		_, err = call.FetchAndLoad(context.TODO())
-		assert.ErrorContains(t, err, "response length must be less than max allowed response length of 10")
+		data, err = call.FetchAndLoad(context.TODO())
+		assert.ErrorContains(t, err, "response length must be less than max allowed response length of 10.")
 
 		call, err = New(logr.Discard(), jp, entry, ctx, nil, apiConfigWithoutSecurityCheck)
 		assert.NilError(t, err)
@@ -125,12 +123,10 @@ func Test_servicePostRequest(t *testing.T) {
 
 	entry := kyvernov1.ContextEntry{
 		Name: "test",
-		APICall: &kyvernov1.ContextAPICall{
-			APICall: kyvernov1.APICall{
-				Method: "POST",
-				Service: &kyvernov1.ServiceCall{
-					URL: s.URL + "/resource",
-				},
+		APICall: &kyvernov1.APICall{
+			Method: "POST",
+			Service: &kyvernov1.ServiceCall{
+				URL: s.URL + "/resource",
 			},
 		},
 	}

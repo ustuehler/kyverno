@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/kyverno/kyverno/ext/wildcard"
 	"github.com/kyverno/kyverno/pkg/pss/utils"
 	datautils "github.com/kyverno/kyverno/pkg/utils/data"
+	wildcard "github.com/kyverno/kyverno/pkg/utils/wildcard"
 	admissionregistrationv1alpha1 "k8s.io/api/admissionregistration/v1alpha1"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -112,19 +112,6 @@ func (r *Rule) HasMutate() bool {
 	return !datautils.DeepEqual(r.Mutation, Mutation{})
 }
 
-// HasMutateStandard checks for standard admission mutate rule
-func (r *Rule) HasMutateStandard() bool {
-	if r.HasMutateExisting() {
-		return false
-	}
-	return !datautils.DeepEqual(r.Mutation, Mutation{})
-}
-
-// HasMutateExisting checks if the mutate rule applies to existing resources
-func (r *Rule) HasMutateExisting() bool {
-	return r.Mutation.Targets != nil
-}
-
 // HasVerifyImages checks for verifyImages rule
 func (r *Rule) HasVerifyImages() bool {
 	for _, verifyImage := range r.VerifyImages {
@@ -170,15 +157,20 @@ func (r *Rule) HasGenerate() bool {
 	return !datautils.DeepEqual(r.Generation, Generation{})
 }
 
+// IsMutateExisting checks if the mutate rule applies to existing resources
+func (r *Rule) IsMutateExisting() bool {
+	return r.Mutation.Targets != nil
+}
+
 func (r *Rule) IsPodSecurity() bool {
 	return r.Validation.PodSecurity != nil
 }
 
-func (r *Rule) GetTypeAndSyncAndOrphanDownstream() (_ GenerateType, sync bool, orphanDownstream bool) {
+func (r *Rule) GetGenerateTypeAndSync() (_ GenerateType, sync bool) {
 	if !r.HasGenerate() {
 		return
 	}
-	return r.Generation.GetTypeAndSyncAndOrphanDownstream()
+	return r.Generation.GetTypeAndSync()
 }
 
 func (r *Rule) GetAnyAllConditions() apiextensions.JSON {
@@ -377,7 +369,7 @@ func (r *Rule) ValidateMatchExcludeConflict(path *field.Path) (errs field.ErrorL
 
 // ValidateMutationRuleTargetNamespace checks if the targets are scoped to the policy's namespace
 func (r *Rule) ValidateMutationRuleTargetNamespace(path *field.Path, namespaced bool, policyNamespace string) (errs field.ErrorList) {
-	if r.HasMutateExisting() && namespaced {
+	if r.HasMutate() && namespaced {
 		for idx, target := range r.Mutation.Targets {
 			if target.Namespace != "" && target.Namespace != policyNamespace {
 				errs = append(errs, field.Invalid(path.Child("targets").Index(idx).Child("namespace"), target.Namespace, "This field can be ignored or should have value of the namespace where the policy is being created"))
@@ -396,7 +388,16 @@ func (r *Rule) ValidatePSaControlNames(path *field.Path) (errs field.ErrorList) 
 		}
 
 		for idx, exclude := range podSecurity.Exclude {
-			errs = append(errs, exclude.Validate(path.Child("podSecurity").Child("exclude").Index(idx))...)
+			// container level control must specify images
+			if containsString(utils.PSS_container_level_control, exclude.ControlName) {
+				if len(exclude.Images) == 0 {
+					errs = append(errs, field.Invalid(path.Child("podSecurity").Child("exclude").Index(idx).Child("controlName"), exclude.ControlName, "exclude.images must be specified for the container level control"))
+				}
+			} else if containsString(utils.PSS_pod_level_control, exclude.ControlName) {
+				if len(exclude.Images) != 0 {
+					errs = append(errs, field.Invalid(path.Child("podSecurity").Child("exclude").Index(idx).Child("controlName"), exclude.ControlName, "exclude.images must not be specified for the pod level control"))
+				}
+			}
 
 			if containsString([]string{"Seccomp", "Capabilities"}, exclude.ControlName) {
 				continue

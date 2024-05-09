@@ -54,7 +54,9 @@ type Spec struct {
 	// +kubebuilder:default=true
 	Background *bool `json:"background,omitempty" yaml:"background,omitempty"`
 
-	// Deprecated.
+	// SchemaValidation skips validation checks for policies as well as patched resources.
+	// Optional. The default value is set to "true", it must be set to "false" to disable the validation checks.
+	// +optional
 	SchemaValidation *bool `json:"schemaValidation,omitempty" yaml:"schemaValidation,omitempty"`
 
 	// WebhookTimeoutSeconds specifies the maximum time in seconds allowed to apply this policy.
@@ -82,15 +84,6 @@ type Spec struct {
 	// Defaults to "false" if not specified.
 	// +optional
 	UseServerSideApply bool `json:"useServerSideApply,omitempty" yaml:"useServerSideApply,omitempty"`
-
-	// WebhookConfiguration specifies the custom configuration for Kubernetes admission webhookconfiguration.
-	// Requires Kubernetes 1.27 or later.
-	// +optional
-	WebhookConfiguration *WebhookConfiguration `json:"webhookConfiguration,omitempty" yaml:"webhookConfiguration,omitempty"`
-}
-
-func (s *Spec) CustomWebhookConfiguration() bool {
-	return s.WebhookConfiguration != nil
 }
 
 func (s *Spec) SetRules(rules []Rule) {
@@ -115,26 +108,6 @@ func (s *Spec) HasMutate() bool {
 		}
 	}
 
-	return false
-}
-
-// HasMutate checks for standard admission mutate rule
-func (s *Spec) HasMutateStandard() bool {
-	for _, rule := range s.Rules {
-		if rule.HasMutateStandard() {
-			return true
-		}
-	}
-	return false
-}
-
-// HasMutate checks for mutate existing rule types
-func (s *Spec) HasMutateExisting() bool {
-	for _, rule := range s.Rules {
-		if rule.HasMutateExisting() {
-			return true
-		}
-	}
 	return false
 }
 
@@ -209,6 +182,16 @@ func (s *Spec) BackgroundProcessingEnabled() bool {
 	}
 
 	return *s.Background
+}
+
+// IsMutateExisting checks if the mutate policy applies to existing resources
+func (s *Spec) IsMutateExisting() bool {
+	for _, rule := range s.Rules {
+		if rule.IsMutateExisting() {
+			return true
+		}
+	}
+	return false
 }
 
 // GetMutateExistingOnPolicyUpdate return MutateExistingOnPolicyUpdate set value

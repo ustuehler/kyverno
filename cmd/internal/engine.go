@@ -14,11 +14,9 @@ import (
 	"github.com/kyverno/kyverno/pkg/engine/adapters"
 	engineapi "github.com/kyverno/kyverno/pkg/engine/api"
 	"github.com/kyverno/kyverno/pkg/engine/apicall"
-	"github.com/kyverno/kyverno/pkg/engine/context/loaders"
 	"github.com/kyverno/kyverno/pkg/engine/context/resolvers"
 	"github.com/kyverno/kyverno/pkg/engine/factories"
 	"github.com/kyverno/kyverno/pkg/engine/jmespath"
-	"github.com/kyverno/kyverno/pkg/exceptions"
 	"github.com/kyverno/kyverno/pkg/imageverifycache"
 	"github.com/kyverno/kyverno/pkg/registryclient"
 	"k8s.io/client-go/kubernetes"
@@ -38,7 +36,6 @@ func NewEngine(
 	kyvernoClient versioned.Interface,
 	secretLister corev1listers.SecretNamespaceLister,
 	apiCallConfig apicall.APICallConfiguration,
-	gctxStore loaders.Store,
 ) engineapi.Engine {
 	configMapResolver := NewConfigMapResolver(ctx, logger, kubeClient, 15*time.Minute)
 	exceptionsSelector := NewExceptionSelector(ctx, logger, kyvernoClient, 15*time.Minute)
@@ -51,8 +48,9 @@ func NewEngine(
 		adapters.Client(client),
 		factories.DefaultRegistryClientFactory(adapters.RegistryClient(rclient), secretLister),
 		ivCache,
-		factories.DefaultContextLoaderFactory(configMapResolver, factories.WithAPICallConfig(apiCallConfig), factories.WithGlobalContextStore(gctxStore)),
+		factories.DefaultContextLoaderFactory(configMapResolver, factories.WithAPICallConfig(apiCallConfig)),
 		exceptionsSelector,
+		imageSignatureRepository,
 	)
 }
 
@@ -67,17 +65,16 @@ func NewExceptionSelector(
 	var exceptionsLister engineapi.PolicyExceptionSelector
 	if enablePolicyException {
 		factory := kyvernoinformer.NewSharedInformerFactory(kyvernoClient, resyncPeriod)
-		var lister exceptions.Lister
+		lister := factory.Kyverno().V2beta1().PolicyExceptions().Lister()
 		if exceptionNamespace != "" {
-			lister = factory.Kyverno().V2beta1().PolicyExceptions().Lister().PolicyExceptions(exceptionNamespace)
+			exceptionsLister = lister.PolicyExceptions(exceptionNamespace)
 		} else {
-			lister = factory.Kyverno().V2beta1().PolicyExceptions().Lister()
+			exceptionsLister = lister
 		}
 		// start informers and wait for cache sync
 		if !StartInformersAndWaitForCacheSync(ctx, logger, factory) {
 			checkError(logger, errors.New("failed to wait for cache sync"), "failed to wait for cache sync")
 		}
-		exceptionsLister = exceptions.New(lister)
 	}
 	return exceptionsLister
 }

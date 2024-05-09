@@ -35,7 +35,7 @@ func (e *engine) mutate(
 			if !rule.HasMutate() {
 				return nil, nil
 			}
-			if !policyContext.AdmissionOperation() && rule.HasMutateExisting() {
+			if !policyContext.AdmissionOperation() && rule.IsMutateExisting() {
 				return mutation.NewMutateExistingHandler(e.client)
 			}
 			return mutation.NewMutateResourceHandler()

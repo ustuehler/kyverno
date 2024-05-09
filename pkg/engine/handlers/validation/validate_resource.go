@@ -9,7 +9,6 @@ import (
 	"github.com/go-logr/logr"
 	gojmespath "github.com/kyverno/go-jmespath"
 	kyvernov1 "github.com/kyverno/kyverno/api/kyverno/v1"
-	kyvernov2beta1 "github.com/kyverno/kyverno/api/kyverno/v2beta1"
 	engineapi "github.com/kyverno/kyverno/pkg/engine/api"
 	"github.com/kyverno/kyverno/pkg/engine/handlers"
 	"github.com/kyverno/kyverno/pkg/engine/internal"
@@ -22,7 +21,6 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/client-go/tools/cache"
 )
 
 type validateResourceHandler struct{}
@@ -38,22 +36,7 @@ func (h validateResourceHandler) Process(
 	resource unstructured.Unstructured,
 	rule kyvernov1.Rule,
 	contextLoader engineapi.EngineContextLoader,
-	exceptions []*kyvernov2beta1.PolicyException,
 ) (unstructured.Unstructured, []engineapi.RuleResponse) {
-	// check if there is a policy exception matches the incoming resource
-	exception := engineutils.MatchesException(exceptions, policyContext, logger)
-	if exception != nil {
-		key, err := cache.MetaNamespaceKeyFunc(exception)
-		if err != nil {
-			logger.Error(err, "failed to compute policy exception key", "namespace", exception.GetNamespace(), "name", exception.GetName())
-			return resource, handlers.WithError(rule, engineapi.Validation, "failed to compute exception key", err)
-		} else {
-			logger.V(3).Info("policy rule skipped due to policy exception", "exception", key)
-			return resource, handlers.WithResponses(
-				engineapi.RuleSkip(rule.Name, engineapi.Validation, "rule skipped due to policy exception "+key).WithException(exception),
-			)
-		}
-	}
 	v := newValidator(logger, contextLoader, policyContext, rule)
 	return resource, handlers.WithResponses(v.validate(ctx))
 }
@@ -170,23 +153,15 @@ func (v *validator) validate(ctx context.Context) *engineapi.RuleResponse {
 }
 
 func (v *validator) validateOldObject(ctx context.Context) (*engineapi.RuleResponse, error) {
-	if v.policyContext.Operation() != kyvernov1.Update {
-		return nil, errors.New("invalid operation")
+	pc := v.policyContext
+	oldPc, err := v.policyContext.OldPolicyContext()
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot get old policy context")
 	}
 
-	newResource := v.policyContext.NewResource()
-	oldResource := v.policyContext.OldResource()
-	emptyResource := unstructured.Unstructured{}
-
-	if err := v.policyContext.SetResources(emptyResource, oldResource); err != nil {
-		return nil, errors.Wrapf(err, "failed to set resources")
-	}
-
+	v.policyContext = oldPc
 	resp := v.validate(ctx)
-
-	if err := v.policyContext.SetResources(oldResource, newResource); err != nil {
-		return nil, errors.Wrapf(err, "failed to reset resources")
-	}
+	v.policyContext = pc
 
 	return resp, nil
 }
@@ -206,7 +181,10 @@ func (v *validator) validateForEach(ctx context.Context) *engineapi.RuleResponse
 		applyCount += count
 	}
 	if applyCount == 0 {
-		return nil
+		if v.forEach == nil {
+			return nil
+		}
+		return engineapi.RuleSkip(v.rule.Name, engineapi.Validation, "rule skipped")
 	}
 	return engineapi.RulePass(v.rule.Name, engineapi.Validation, "rule passed")
 }
@@ -222,7 +200,7 @@ func (v *validator) validateElements(ctx context.Context, foreach kyvernov1.ForE
 		}
 
 		v.policyContext.JSONContext().Reset()
-		policyContext := v.policyContext
+		policyContext := v.policyContext.Copy()
 		if err := engineutils.AddElementToContext(policyContext, element, index, v.nesting, elementScope); err != nil {
 			v.log.Error(err, "failed to add element to context")
 			return engineapi.RuleError(v.rule.Name, engineapi.Validation, "failed to process foreach", err), applyCount
@@ -339,7 +317,7 @@ func (v *validator) validatePatterns(resource unstructured.Unstructured) *engine
 				return engineapi.RuleFail(v.rule.Name, engineapi.Validation, v.buildErrorMessage(err, pe.Path))
 			}
 
-			return engineapi.RuleError(v.rule.Name, engineapi.Validation, v.buildErrorMessage(err, ""), nil)
+			return engineapi.RuleError(v.rule.Name, engineapi.Validation, v.buildErrorMessage(err, pe.Path), nil)
 		}
 
 		v.log.V(4).Info("successfully processed rule")
@@ -397,7 +375,7 @@ func (v *validator) validatePatterns(resource unstructured.Unstructured) *engine
 			}
 
 			v.log.V(4).Info(fmt.Sprintf("Validation rule '%s' failed. %s", v.rule.Name, errorStr))
-			msg := v.buildAnyPatternErrorMessage(errorStr)
+			msg := buildAnyPatternErrorMessage(v.rule, errorStr)
 			return engineapi.RuleFail(v.rule.Name, engineapi.Validation, msg)
 		}
 	}
@@ -448,22 +426,17 @@ func (v *validator) buildErrorMessage(err error, path string) string {
 	}
 }
 
-func (v *validator) buildAnyPatternErrorMessage(errors []string) string {
+func buildAnyPatternErrorMessage(rule kyvernov1.Rule, errors []string) string {
 	errStr := strings.Join(errors, " ")
-	if v.rule.Validation.Message == "" {
+	if rule.Validation.Message == "" {
 		return fmt.Sprintf("validation error: %s", errStr)
 	}
-	msgRaw, sErr := variables.SubstituteAll(v.log, v.policyContext.JSONContext(), v.rule.Validation.Message)
-	if sErr != nil {
-		v.log.V(2).Info("failed to substitute variables in message", "error", sErr)
-		return fmt.Sprintf("validation error: variables substitution error in rule %s execution error: %s", v.rule.Name, errStr)
-	} else {
-		msg := msgRaw.(string)
-		if strings.HasSuffix(msg, ".") {
-			return fmt.Sprintf("validation error: %s %s", msg, errStr)
-		}
-		return fmt.Sprintf("validation error: %s. %s", msg, errStr)
+
+	if strings.HasSuffix(rule.Validation.Message, ".") {
+		return fmt.Sprintf("validation error: %s %s", rule.Validation.Message, errStr)
 	}
+
+	return fmt.Sprintf("validation error: %s. %s", rule.Validation.Message, errStr)
 }
 
 func (v *validator) substitutePatterns() error {

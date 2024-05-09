@@ -16,8 +16,10 @@ limitations under the License.
 package v2beta1
 
 import (
-	kyvernov1 "github.com/kyverno/kyverno/api/kyverno/v1"
-	"github.com/kyverno/kyverno/ext/wildcard"
+	"fmt"
+
+	"github.com/kyverno/kyverno/pkg/engine/variables/regex"
+	"github.com/kyverno/kyverno/pkg/utils/wildcard"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
@@ -39,22 +41,20 @@ type PolicyException struct {
 
 // Validate implements programmatic validation
 func (p *PolicyException) Validate() (errs field.ErrorList) {
+	if err := ValidateVariables(p); err != nil {
+		errs = append(errs, field.Forbidden(field.NewPath(""), fmt.Sprintf("Policy Exception \"%s\" should not have variables", p.Name)))
+	}
 	errs = append(errs, p.Spec.Validate(field.NewPath("spec"))...)
 	return errs
+}
+
+func ValidateVariables(polex *PolicyException) error {
+	return regex.ObjectHasVariables(polex)
 }
 
 // Contains returns true if it contains an exception for the given policy/rule pair
 func (p *PolicyException) Contains(policy string, rule string) bool {
 	return p.Spec.Contains(policy, rule)
-}
-
-func (p *PolicyException) GetKind() string {
-	return "PolicyException"
-}
-
-// HasPodSecurity checks if podSecurity controls is specified
-func (p *PolicyException) HasPodSecurity() bool {
-	return len(p.Spec.PodSecurity) > 0
 }
 
 // PolicyExceptionSpec stores policy exception spec
@@ -67,18 +67,8 @@ type PolicyExceptionSpec struct {
 	// Match defines match clause used to check if a resource applies to the exception
 	Match MatchResources `json:"match" yaml:"match"`
 
-	// Conditions are used to determine if a resource applies to the exception by evaluating a
-	// set of conditions. The declaration can contain nested `any` or `all` statements.
-	// +optional
-	Conditions *AnyAllConditions `json:"conditions,omitempty"`
-
 	// Exceptions is a list policy/rules to be excluded
 	Exceptions []Exception `json:"exceptions" yaml:"exceptions"`
-
-	// PodSecurity specifies the Pod Security Standard controls to be excluded.
-	// Applicable only to policies that have validate.podSecurity subrule.
-	// +optional
-	PodSecurity []kyvernov1.PodSecurityStandard `json:"podSecurity,omitempty" yaml:"podSecurity,omitempty"`
 }
 
 func (p *PolicyExceptionSpec) BackgroundProcessingEnabled() bool {
@@ -99,11 +89,6 @@ func (p *PolicyExceptionSpec) Validate(path *field.Path) (errs field.ErrorList) 
 	exceptionsPath := path.Child("exceptions")
 	for i, e := range p.Exceptions {
 		errs = append(errs, e.Validate(exceptionsPath.Index(i))...)
-	}
-
-	podSecuityPath := path.Child("podSecurity")
-	for i, p := range p.PodSecurity {
-		errs = append(errs, p.Validate(podSecuityPath.Index(i))...)
 	}
 	return errs
 }

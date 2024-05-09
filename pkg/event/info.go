@@ -1,25 +1,25 @@
 package event
 
-import (
-	"strings"
-
-	corev1 "k8s.io/api/core/v1"
-)
+import "strings"
 
 // Info defines the event details
 type Info struct {
-	Regarding corev1.ObjectReference
-	Related   *corev1.ObjectReference
-	Reason    Reason
-	Message   string
-	Action    Action
-	Source    Source
-	Type      string
+	Kind              string
+	Name              string
+	Namespace         string
+	RelatedAPIVersion string
+	RelatedKind       string
+	RelatedName       string
+	RelatedNamespace  string
+	Reason            Reason
+	Message           string
+	Action            Action
+	Source            Source
 }
 
 func (i *Info) Resource() string {
-	if i.Regarding.Namespace == "" {
-		return strings.Join([]string{i.Regarding.Kind, i.Regarding.Name}, "/")
+	if i.Namespace == "" {
+		return strings.Join([]string{i.Kind, i.Name}, "/")
 	}
-	return strings.Join([]string{i.Regarding.Kind, i.Regarding.Namespace, i.Regarding.Name}, "/")
+	return strings.Join([]string{i.Kind, i.Namespace, i.Name}, "/")
 }

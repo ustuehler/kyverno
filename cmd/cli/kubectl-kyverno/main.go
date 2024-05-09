@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/kyverno/kyverno/cmd/cli/kubectl-kyverno/commands"
-	"github.com/kyverno/kyverno/cmd/cli/kubectl-kyverno/commands/apply"
 	"github.com/kyverno/kyverno/cmd/cli/kubectl-kyverno/experimental"
 	"github.com/kyverno/kyverno/cmd/cli/kubectl-kyverno/log"
 	"github.com/spf13/cobra"
@@ -19,12 +18,7 @@ func main() {
 		os.Exit(1)
 	}
 	if err := cmd.Execute(); err != nil {
-		switch e := err.(type) {
-		case apply.WarnExitCodeError:
-			os.Exit(e.ExitCode)
-		default:
-			os.Exit(1)
-		}
+		os.Exit(1)
 	}
 }
 

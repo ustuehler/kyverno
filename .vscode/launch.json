@@ -91,7 +91,7 @@
             "cwd": "${workspaceFolder}",
             "args": [
                 "test",
-                "test/cli"
+                "./test/cli/",
             ],
         }
     ]

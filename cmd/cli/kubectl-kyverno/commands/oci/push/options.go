@@ -35,12 +35,12 @@ func (o options) validate(policy string) error {
 }
 
 func (o options) execute(ctx context.Context, dir string, keychain authn.Keychain) error {
-	policies, _, _, err := policy.Load(nil, "", dir)
+	policies, _, err := policy.Load(nil, "", dir)
 	if err != nil {
 		return fmt.Errorf("unable to read policy file or directory %s (%w)", dir, err)
 	}
 	for _, policy := range policies {
-		if _, err := policyvalidation.Validate(policy, nil, nil, nil, true, config.KyvernoUserName(config.KyvernoServiceAccountName())); err != nil {
+		if _, err := policyvalidation.Validate(policy, nil, nil, true, config.KyvernoUserName(config.KyvernoServiceAccountName())); err != nil {
 			return fmt.Errorf("validating policy %s: %v", policy.GetName(), err)
 		}
 	}

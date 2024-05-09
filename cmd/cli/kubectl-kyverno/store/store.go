@@ -19,56 +19,56 @@ type Rule struct {
 	ForEachValues map[string][]interface{} `json:"foreachValues"`
 }
 
-type Store struct {
+var (
 	local          bool
 	registryClient registryclient.Client
 	allowApiCalls  bool
 	policies       []Policy
 	foreachElement int
-}
+)
 
 // SetLocal sets local (clusterless) execution for the CLI
-func (s *Store) SetLocal(m bool) {
-	s.local = m
+func SetLocal(m bool) {
+	local = m
 }
 
 // IsLocal returns 'true' if the CLI is in local (clusterless) execution
-func (s *Store) IsLocal() bool {
-	return s.local
+func IsLocal() bool {
+	return local
 }
 
-func (s *Store) SetForEachElement(element int) {
-	s.foreachElement = element
+func SetForEachElement(element int) {
+	foreachElement = element
 }
 
-func (s *Store) GetForeachElement() int {
-	return s.foreachElement
+func GetForeachElement() int {
+	return foreachElement
 }
 
-func (s *Store) SetRegistryAccess(access bool) {
+func SetRegistryAccess(access bool) {
 	if access {
-		s.registryClient = registryclient.NewOrDie(registryclient.WithLocalKeychain())
+		registryClient = registryclient.NewOrDie(registryclient.WithLocalKeychain())
 	}
 }
 
-func (s *Store) GetRegistryAccess() bool {
-	return s.registryClient != nil
+func GetRegistryAccess() bool {
+	return registryClient != nil
 }
 
-func (s *Store) GetRegistryClient() registryclient.Client {
-	return s.registryClient
+func GetRegistryClient() registryclient.Client {
+	return registryClient
 }
 
-func (s *Store) SetPolicies(p ...Policy) {
-	s.policies = p
+func SetPolicies(p ...Policy) {
+	policies = p
 }
 
-func (s *Store) HasPolicies() bool {
-	return len(s.policies) != 0
+func HasPolicies() bool {
+	return len(policies) != 0
 }
 
-func (s *Store) GetPolicy(policyName string) *Policy {
-	for _, policy := range s.policies {
+func GetPolicy(policyName string) *Policy {
+	for _, policy := range policies {
 		if policy.Name == policyName {
 			return &policy
 		}
@@ -76,8 +76,8 @@ func (s *Store) GetPolicy(policyName string) *Policy {
 	return nil
 }
 
-func (s *Store) GetPolicyRule(policyName string, ruleName string) *Rule {
-	for _, policy := range s.policies {
+func GetPolicyRule(policyName string, ruleName string) *Rule {
+	for _, policy := range policies {
 		if policy.Name == policyName {
 			for _, rule := range policy.Rules {
 				switch ruleName {
@@ -90,10 +90,10 @@ func (s *Store) GetPolicyRule(policyName string, ruleName string) *Rule {
 	return nil
 }
 
-func (s *Store) AllowApiCall(allow bool) {
-	s.allowApiCalls = allow
+func AllowApiCall(allow bool) {
+	allowApiCalls = allow
 }
 
-func (s *Store) IsApiCallAllowed() bool {
-	return s.allowApiCalls
+func IsApiCallAllowed() bool {
+	return allowApiCalls
 }

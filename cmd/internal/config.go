@@ -21,7 +21,6 @@ type Configuration interface {
 	UsesApiServerClient() bool
 	UsesMetadataClient() bool
 	UsesKyvernoDynamicClient() bool
-	UsesEventsClient() bool
 	FlagSets() []*flag.FlagSet
 }
 
@@ -133,12 +132,6 @@ func WithKyvernoDynamicClient() ConfigurationOption {
 	}
 }
 
-func WithEventsClient() ConfigurationOption {
-	return func(c *configuration) {
-		c.usesEventsClient = true
-	}
-}
-
 func WithFlagSets(flagsets ...*flag.FlagSet) ConfigurationOption {
 	return func(c *configuration) {
 		c.flagSets = append(c.flagSets, flagsets...)
@@ -162,7 +155,6 @@ type configuration struct {
 	usesApiServerClient      bool
 	usesMetadataClient       bool
 	usesKyvernoDynamicClient bool
-	usesEventsClient         bool
 	flagSets                 []*flag.FlagSet
 }
 
@@ -228,10 +220,6 @@ func (c *configuration) UsesMetadataClient() bool {
 
 func (c *configuration) UsesKyvernoDynamicClient() bool {
 	return c.usesKyvernoDynamicClient
-}
-
-func (c *configuration) UsesEventsClient() bool {
-	return c.usesEventsClient
 }
 
 func (c *configuration) FlagSets() []*flag.FlagSet {

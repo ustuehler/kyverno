@@ -19,14 +19,10 @@ const (
 // GenericPolicy abstracts the policy type (Kyverno policy vs Validating admission policy)
 // It is intended to be used in EngineResponse
 type GenericPolicy interface {
-	// AsKyvernoPolicy returns the kyverno policy
-	AsKyvernoPolicy() kyvernov1.PolicyInterface
-	// AsValidatingAdmissionPolicy returns the validating admission policy
-	AsValidatingAdmissionPolicy() *v1alpha1.ValidatingAdmissionPolicy
+	// GetPolicy returns either kyverno policy or validating admission policy
+	GetPolicy() interface{}
 	// GetType returns policy type
 	GetType() PolicyType
-	// GetAPIVersion returns policy API version
-	GetAPIVersion() string
 	// GetName returns policy name
 	GetName() string
 	// GetNamespace returns policy namespace
@@ -47,20 +43,12 @@ type KyvernoPolicy struct {
 	policy kyvernov1.PolicyInterface
 }
 
-func (p *KyvernoPolicy) AsKyvernoPolicy() kyvernov1.PolicyInterface {
+func (p *KyvernoPolicy) GetPolicy() interface{} {
 	return p.policy
-}
-
-func (p *KyvernoPolicy) AsValidatingAdmissionPolicy() *v1alpha1.ValidatingAdmissionPolicy {
-	return nil
 }
 
 func (p *KyvernoPolicy) GetType() PolicyType {
 	return KyvernoPolicyType
-}
-
-func (p *KyvernoPolicy) GetAPIVersion() string {
-	return "kyverno.io/v1"
 }
 
 func (p *KyvernoPolicy) GetName() string {
@@ -101,20 +89,12 @@ type ValidatingAdmissionPolicy struct {
 	policy v1alpha1.ValidatingAdmissionPolicy
 }
 
-func (p *ValidatingAdmissionPolicy) AsKyvernoPolicy() kyvernov1.PolicyInterface {
-	return nil
-}
-
-func (p *ValidatingAdmissionPolicy) AsValidatingAdmissionPolicy() *v1alpha1.ValidatingAdmissionPolicy {
-	return &p.policy
+func (p *ValidatingAdmissionPolicy) GetPolicy() interface{} {
+	return p.policy
 }
 
 func (p *ValidatingAdmissionPolicy) GetType() PolicyType {
 	return ValidatingAdmissionPolicyType
-}
-
-func (p *ValidatingAdmissionPolicy) GetAPIVersion() string {
-	return "admissionregistration.k8s.io/v1alpha1"
 }
 
 func (p *ValidatingAdmissionPolicy) GetName() string {

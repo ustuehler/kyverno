@@ -7,8 +7,8 @@ import (
 	"sync"
 
 	valid "github.com/asaskevich/govalidator"
-	"github.com/kyverno/kyverno/ext/wildcard"
 	osutils "github.com/kyverno/kyverno/pkg/utils/os"
+	"github.com/kyverno/kyverno/pkg/utils/wildcard"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -24,8 +24,6 @@ const (
 	ValidatingWebhookConfigurationName = "kyverno-resource-validating-webhook-cfg"
 	// ExceptionValidatingWebhookConfigurationName ...
 	ExceptionValidatingWebhookConfigurationName = "kyverno-exception-validating-webhook-cfg"
-	// GlobalContextValidatingWebhookConfigurationName ...
-	GlobalContextValidatingWebhookConfigurationName = "kyverno-global-context-validating-webhook-cfg"
 	// CleanupValidatingWebhookConfigurationName ...
 	CleanupValidatingWebhookConfigurationName = "kyverno-cleanup-validating-webhook-cfg"
 	// PolicyMutatingWebhookConfigurationName default policy mutating webhook configuration name
@@ -60,8 +58,6 @@ const (
 	ValidatingWebhookServicePath = "/validate"
 	// ExceptionValidatingWebhookServicePath is the path for policy exception validation webhook(used to validate policy exception resource)
 	ExceptionValidatingWebhookServicePath = "/exceptionvalidate"
-	// GlobalContextValidatingWebhookServicePath is the path for global context validation webhook(used to validate global context entries)
-	GlobalContextValidatingWebhookServicePath = "/globalcontextvalidate"
 	// CleanupValidatingWebhookServicePath is the path for cleanup policy validation webhook(used to validate cleanup policy resource)
 	CleanupValidatingWebhookServicePath = "/validate"
 	// TtlValidatingWebhookServicePath is the path for validation of cleanup.kyverno.io/ttl label value
@@ -78,8 +74,6 @@ const (
 	ReadinessServicePath = "/health/readiness"
 	// MetricsPath is the path for exposing metrics
 	MetricsPath = "/metrics"
-	// FineGrainedWebhookPath is the sub-path for fine-grained webhook configurationss
-	FineGrainedWebhookPath = "/finegrained"
 )
 
 // keys in config map
@@ -94,7 +88,6 @@ const (
 	generateSuccessEvents         = "generateSuccessEvents"
 	webhooks                      = "webhooks"
 	webhookAnnotations            = "webhookAnnotations"
-	webhookLabels                 = "webhookLabels"
 	matchConditions               = "matchConditions"
 )
 
@@ -169,8 +162,6 @@ type Configuration interface {
 	GetWebhooks() []WebhookConfig
 	// GetWebhookAnnotations returns annotations to set on webhook configs
 	GetWebhookAnnotations() map[string]string
-	// GetWebhookLabels returns labels to set on webhook configs
-	GetWebhookLabels() map[string]string
 	// GetMatchConditions returns match conditions to set on webhook configs
 	GetMatchConditions() []admissionregistrationv1.MatchCondition
 	// Load loads configuration from a configmap
@@ -190,7 +181,6 @@ type configuration struct {
 	generateSuccessEvents         bool
 	webhooks                      []WebhookConfig
 	webhookAnnotations            map[string]string
-	webhookLabels                 map[string]string
 	matchConditions               []admissionregistrationv1.MatchCondition
 	mux                           sync.RWMutex
 	callbacks                     []func()
@@ -310,12 +300,6 @@ func (cd *configuration) GetWebhookAnnotations() map[string]string {
 	return cd.webhookAnnotations
 }
 
-func (cd *configuration) GetWebhookLabels() map[string]string {
-	cd.mux.RLock()
-	defer cd.mux.RUnlock()
-	return cd.webhookLabels
-}
-
 func (cd *configuration) GetMatchConditions() []admissionregistrationv1.MatchCondition {
 	cd.mux.RLock()
 	defer cd.mux.RUnlock()
@@ -348,7 +332,6 @@ func (cd *configuration) load(cm *corev1.ConfigMap) {
 	cd.generateSuccessEvents = false
 	cd.webhooks = nil
 	cd.webhookAnnotations = nil
-	cd.webhookLabels = nil
 	cd.matchConditions = nil
 	// load filters
 	cd.filters = parseKinds(data[resourceFilters])
@@ -454,20 +437,6 @@ func (cd *configuration) load(cm *corev1.ConfigMap) {
 			logger.Info("webhookAnnotations configured")
 		}
 	}
-	// load webhook annotations
-	webhookLabels, ok := data[webhookLabels]
-	if !ok {
-		logger.Info("webhookLabels not set")
-	} else {
-		logger := logger.WithValues("webhookLabels", webhookLabels)
-		webhookLabels, err := parseWebhookLabels(webhookLabels)
-		if err != nil {
-			logger.Error(err, "failed to parse webhook labels")
-		} else {
-			cd.webhookLabels = webhookLabels
-			logger.Info("webhookLabels configured")
-		}
-	}
 	// load match conditions
 	matchConditions, ok := data[matchConditions]
 	if !ok {
@@ -496,7 +465,6 @@ func (cd *configuration) unload() {
 	cd.generateSuccessEvents = false
 	cd.webhooks = nil
 	cd.webhookAnnotations = nil
-	cd.webhookLabels = nil
 	logger.Info("configuration unloaded")
 }
 

@@ -17,14 +17,11 @@ import (
 	"github.com/kyverno/kyverno/pkg/controllers"
 	engineapi "github.com/kyverno/kyverno/pkg/engine/api"
 	enginecontext "github.com/kyverno/kyverno/pkg/engine/context"
-	"github.com/kyverno/kyverno/pkg/engine/context/loaders"
 	"github.com/kyverno/kyverno/pkg/engine/factories"
 	"github.com/kyverno/kyverno/pkg/engine/jmespath"
 	"github.com/kyverno/kyverno/pkg/event"
 	"github.com/kyverno/kyverno/pkg/logging"
 	"github.com/kyverno/kyverno/pkg/metrics"
-	"github.com/kyverno/kyverno/pkg/toggle"
-	"github.com/kyverno/kyverno/pkg/utils/conditions"
 	controllerutils "github.com/kyverno/kyverno/pkg/utils/controller"
 	"github.com/kyverno/kyverno/pkg/utils/match"
 	"go.opentelemetry.io/otel"
@@ -58,7 +55,6 @@ type controller struct {
 	eventGen      event.Interface
 	jp            jmespath.Interface
 	metrics       cleanupMetrics
-	gctxStore     loaders.Store
 }
 
 type cleanupMetrics struct {
@@ -82,7 +78,6 @@ func NewController(
 	cmResolver engineapi.ConfigmapResolver,
 	jp jmespath.Interface,
 	eventGen event.Interface,
-	gctxStore loaders.Store,
 ) controllers.Controller {
 	queue := workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), ControllerName)
 	keyFunc := controllerutils.MetaNamespaceKeyT[kyvernov2alpha1.CleanupPolicyInterface]
@@ -115,7 +110,6 @@ func NewController(
 		eventGen:      eventGen,
 		metrics:       newCleanupMetrics(logger),
 		jp:            jp,
-		gctxStore:     gctxStore,
 	}
 	if _, err := controllerutils.AddEventHandlersT(
 		cpolInformer.Informer(),
@@ -185,7 +179,7 @@ func (c *controller) cleanup(ctx context.Context, logger logr.Logger, policy kyv
 	var errs []error
 
 	enginectx := enginecontext.NewContext(c.jp)
-	ctxFactory := factories.DefaultContextLoaderFactory(c.cmResolver, factories.WithGlobalContextStore(c.gctxStore))
+	ctxFactory := factories.DefaultContextLoaderFactory(c.cmResolver)
 
 	loader := ctxFactory(nil, kyvernov1.Rule{})
 	if err := loader.Load(
@@ -221,43 +215,24 @@ func (c *controller) cleanup(ctx context.Context, logger logr.Logger, policy kyv
 				namespace := resource.GetNamespace()
 				name := resource.GetName()
 				debug := debug.WithValues("name", name, "namespace", namespace)
-				// check if the resource is owned by Kyverno
-				if controllerutils.IsManagedByKyverno(&resource) && toggle.FromContext(ctx).ProtectManagedResources() {
-					continue
-				}
-
-				var nsLabels map[string]string
-				if namespace != "" {
-					ns, err := c.nsLister.Get(namespace)
-					if err != nil {
-						debug.Error(err, "failed to get namespace labels")
-						errs = append(errs, err)
+				if !controllerutils.IsManagedByKyverno(&resource) {
+					var nsLabels map[string]string
+					if namespace != "" {
+						ns, err := c.nsLister.Get(namespace)
+						if err != nil {
+							debug.Error(err, "failed to get namespace labels")
+							errs = append(errs, err)
+						}
+						nsLabels = ns.GetLabels()
 					}
-					nsLabels = ns.GetLabels()
-				}
-				// match namespaces
-				if err := match.CheckNamespace(policy.GetNamespace(), resource); err != nil {
-					debug.Info("resource namespace didn't match policy namespace", "result", err)
-				}
-				// match resource with match/exclude clause
-				matched := match.CheckMatchesResources(
-					resource,
-					spec.MatchResources,
-					nsLabels,
-					// TODO(eddycharly): we don't have user info here, we should check that
-					// we don't have user conditions in the policy rule
-					kyvernov1beta1.RequestInfo{},
-					resource.GroupVersionKind(),
-					"",
-				)
-				if matched != nil {
-					debug.Info("resource/match didn't match", "result", matched)
-					continue
-				}
-				if spec.ExcludeResources != nil {
-					excluded := match.CheckMatchesResources(
+					// match namespaces
+					if err := match.CheckNamespace(policy.GetNamespace(), resource); err != nil {
+						debug.Info("resource namespace didn't match policy namespace", "result", err)
+					}
+					// match resource with match/exclude clause
+					matched := match.CheckMatchesResources(
 						resource,
-						*spec.ExcludeResources,
+						spec.MatchResources,
 						nsLabels,
 						// TODO(eddycharly): we don't have user info here, we should check that
 						// we don't have user conditions in the policy rule
@@ -265,19 +240,8 @@ func (c *controller) cleanup(ctx context.Context, logger logr.Logger, policy kyv
 						resource.GroupVersionKind(),
 						"",
 					)
-					if excluded == nil {
-						debug.Info("resource/exclude matched")
-						continue
-					} else {
-						debug.Info("resource/exclude didn't match", "result", excluded)
-					}
-				}
-				// check conditions
-				if spec.Conditions != nil {
-					enginectx.Reset()
-					if err := enginectx.SetTargetResource(resource.Object); err != nil {
-						debug.Error(err, "failed to add resource in context")
-						errs = append(errs, err)
+					if matched != nil {
+						debug.Info("resource/match didn't match", "result", matched)
 						continue
 					}
 					if spec.ExcludeResources != nil {
@@ -316,7 +280,7 @@ func (c *controller) cleanup(ctx context.Context, logger logr.Logger, policy kyv
 							errs = append(errs, err)
 							continue
 						}
-						passed, err := conditions.CheckAnyAllConditions(logger, enginectx, *spec.Conditions)
+						passed, err := checkAnyAllConditions(logger, enginectx, *spec.Conditions)
 						if err != nil {
 							debug.Error(err, "failed to check condition")
 							errs = append(errs, err)
@@ -337,43 +301,16 @@ func (c *controller) cleanup(ctx context.Context, logger logr.Logger, policy kyv
 						}
 						debug.Error(err, "failed to delete resource")
 						errs = append(errs, err)
-						continue
+						e := event.NewCleanupPolicyEvent(policy, resource, err)
+						c.eventGen.Add(e)
+					} else {
+						if c.metrics.deletedObjectsTotal != nil {
+							c.metrics.deletedObjectsTotal.Add(ctx, 1, metric.WithAttributes(labels...))
+						}
+						debug.Info("deleted")
+						e := event.NewCleanupPolicyEvent(policy, resource, nil)
+						c.eventGen.Add(e)
 					}
-					if err := enginectx.AddImageInfos(&resource, c.configuration); err != nil {
-						debug.Error(err, "failed to add image infos in context")
-						errs = append(errs, err)
-						continue
-					}
-					passed, err := conditions.CheckAnyAllConditions(logger, enginectx, *spec.Conditions)
-					if err != nil {
-						debug.Error(err, "failed to check condition")
-						errs = append(errs, err)
-						continue
-					}
-					if !passed {
-						debug.Info("conditions did not pass")
-						continue
-					}
-				}
-				var labels []attribute.KeyValue
-				labels = append(labels, commonLabels...)
-				labels = append(labels, attribute.String("resource_namespace", namespace))
-				logger.WithValues("name", name, "namespace", namespace).Info("resource matched, it will be deleted...")
-				if err := c.client.DeleteResource(ctx, resource.GetAPIVersion(), resource.GetKind(), namespace, name, false); err != nil {
-					if c.metrics.cleanupFailuresTotal != nil {
-						c.metrics.cleanupFailuresTotal.Add(ctx, 1, metric.WithAttributes(labels...))
-					}
-					debug.Error(err, "failed to delete resource")
-					errs = append(errs, err)
-					e := event.NewCleanupPolicyEvent(policy, resource, err)
-					c.eventGen.Add(e)
-				} else {
-					if c.metrics.deletedObjectsTotal != nil {
-						c.metrics.deletedObjectsTotal.Add(ctx, 1, metric.WithAttributes(labels...))
-					}
-					debug.Info("deleted")
-					e := event.NewCleanupPolicyEvent(policy, resource, nil)
-					c.eventGen.Add(e)
 				}
 			}
 		}
