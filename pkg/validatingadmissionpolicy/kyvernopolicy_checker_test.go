@@ -30,7 +30,7 @@ func Test_Check_Resources(t *testing.T) {
   ]
 }
 `),
-			expected: true,
+			expected: false,
 		},
 		{
 			name: "resource-with-annotations",
