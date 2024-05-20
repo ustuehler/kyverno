@@ -19,6 +19,8 @@ spec:
             kinds:
             - Pod
       validate:
-        cel:
-          expressions:
-            - expression: "'app' in object.metadata.labels"
+        message: "The label `app` is required."
+        pattern:
+          metadata:
+            labels:
+              app: "?*"

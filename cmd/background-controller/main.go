@@ -144,7 +144,6 @@ func main() {
 	// informer factories
 	kyvernoInformer := kyvernoinformer.NewSharedInformerFactory(setup.KyvernoClient, resyncPeriod)
 	var wg sync.WaitGroup
-	polexCache, polexController := internal.NewExceptionSelector(setup.Logger, kyvernoInformer)
 	eventGenerator := event.NewEventGenerator(
 		setup.EventsClient,
 		logging.WithName("EventGenerator"),
@@ -189,7 +188,6 @@ func main() {
 		setup.KyvernoClient,
 		setup.RegistrySecretLister,
 		apicall.NewAPICallConfiguration(maxAPICallResponseLength),
-		polexCache,
 		gcstore,
 	)
 	// start informers and wait for cache sync
@@ -250,9 +248,6 @@ func main() {
 	// start non leader controllers
 	eventController.Run(signalCtx, setup.Logger, &wg)
 	gceController.Run(signalCtx, setup.Logger, &wg)
-	if polexController != nil {
-		polexController.Run(signalCtx, setup.Logger, &wg)
-	}
 	// start leader election
 	le.Run(signalCtx)
 	// wait for everything to shut down and exit
