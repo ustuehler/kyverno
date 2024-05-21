@@ -115,20 +115,7 @@ func translateResource(discoveryClient dclient.IDiscovery, matchResources *admis
 	}
 
 	matchResources.ResourceRules = *rules
-	if len(res.Namespaces) > 0 {
-		namespaceSelector := &metav1.LabelSelector{
-			MatchExpressions: []metav1.LabelSelectorRequirement{
-				{
-					Key:      "kubernetes.io/metadata.name",
-					Operator: "In",
-					Values:   res.Namespaces,
-				},
-			},
-		}
-		matchResources.NamespaceSelector = namespaceSelector
-	} else {
-		matchResources.NamespaceSelector = res.NamespaceSelector
-	}
+	matchResources.NamespaceSelector = res.NamespaceSelector
 	matchResources.ObjectSelector = res.Selector
 	return nil
 }
