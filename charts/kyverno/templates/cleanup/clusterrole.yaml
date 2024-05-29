@@ -10,7 +10,6 @@ rules:
     resources:
       - admissionreports
       - clusteradmissionreports
-      - updaterequests
     verbs:
       - list
       - deletecollection
